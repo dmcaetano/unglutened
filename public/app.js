@@ -185,17 +185,55 @@
     ov.classList.add('hidden');
     ov.setAttribute('aria-hidden', 'true');
   }
-  async function checkAuth() {
-    try {
-      const s = await api('/api/auth/status');
-      state.authRequired = !!s.authRequired;
-      state.authed = !!s.authed;
-      if (state.authRequired && !state.authed) showLogin();
-      else hideLogin();
-      $('#logoutBtn').style.display = state.authRequired ? '' : 'none';
-    } catch (e) {
-      // status endpoint is public; failure here means network trouble, not auth.
+  // Show/clear a "waking up" state on the login overlay. The host (Render free
+  // tier) spins the server down when idle; the first request then takes ~30-60s
+  // to wake and may briefly 404. Rather than fall through to a broken-looking
+  // empty app, we surface a friendly waking message and retry.
+  function setLoginWaking(on, failed) {
+    const ov = $('#loginOverlay');
+    const sub = $('#loginForm p');
+    const pw = $('#loginPw').closest('.field');
+    const btn = $('#loginForm button[type="submit"]');
+    if (on) {
+      ov.classList.remove('hidden');
+      ov.setAttribute('aria-hidden', 'false');
+      if (sub) sub.textContent = 'Waking up the server… the first load can take up to a minute.';
+      if (pw) pw.style.display = 'none';
+      if (btn) btn.style.display = 'none';
+    } else {
+      if (sub) sub.textContent = failed
+        ? 'Couldn’t reach the server. Please refresh in a moment.'
+        : 'Enter your passcode to continue.';
+      if (pw) pw.style.display = '';
+      if (btn) btn.style.display = failed ? 'none' : '';
     }
+  }
+
+  // Returns true if the server responded (auth state known), false if unreachable.
+  async function checkAuth() {
+    const MAX_RETRIES = 12; // ~12 * 4s ≈ 48s, enough for a free-tier cold start
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const s = await api('/api/auth/status');
+        state.authRequired = !!s.authRequired;
+        state.authed = !!s.authed;
+        setLoginWaking(false);
+        if (state.authRequired && !state.authed) showLogin();
+        else hideLogin();
+        $('#logoutBtn').style.display = state.authRequired ? '' : 'none';
+        return true;
+      } catch (e) {
+        // Server likely cold-starting. Show the waking state and retry.
+        if (attempt < MAX_RETRIES) {
+          setLoginWaking(true);
+          await new Promise((r) => setTimeout(r, 4000));
+          continue;
+        }
+        setLoginWaking(false, true);
+        return false;
+      }
+    }
+    return false;
   }
   function initAuthForm() {
     $('#loginForm').addEventListener('submit', async (e) => {
@@ -1004,7 +1042,8 @@
     initModals();
     registerSW();
 
-    await checkAuth();
+    const reachable = await checkAuth();
+    if (!reachable) return; // server unreachable; waking/refresh message already shown
     if (!(state.authRequired && !state.authed)) {
       await bootData();
     } else {
