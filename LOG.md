@@ -22,7 +22,12 @@ Newest entries at the top.
 
 **What didn't work / open items**
 
-- None. Build bump (refinements to existing photo/auth features), codename stays "Batman".
+- Found during live QA: the service worker was **cache-first** for the app shell, so returning
+  visitors saw the *old* build (e.g. the pre-accounts passcode login) until a manual reload — the
+  cache version wasn't bumped on shell changes. **Fixed (v1.1.3):** switched the shell to
+  **network-first** (always fetch the latest when online; cache only as an offline fallback) and
+  bumped the SW cache version to v4. Deploys are now picked up immediately. (Verified the server was
+  serving the new shell all along — it was purely SW staleness.)
 
 ---
 
