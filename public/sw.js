@@ -1,12 +1,15 @@
 /* UnGlutened service worker
-   Strategy (this is an always-online app — freshness beats offline-first):
+   Strategy (this is an always-online, multi-user app — freshness & correctness
+   beat offline-first):
    - App shell (HTML/CSS/JS/icons/manifest): NETWORK-FIRST. Always serve the latest
      when online so a deploy is picked up immediately; fall back to cache offline.
-     (Cache-first previously left returning visitors on a stale build until a reload.)
-   - /api/*: network-first, fall back to cache only if offline.
+   - /api/* and /healthz: NETWORK-ONLY. NEVER cached. Caching authenticated,
+     user-specific API responses keyed by URL is unsafe — on a network hiccup the
+     SW could serve one user's cached data (or a stale logged-out auth state) to a
+     different session. So we never store or serve API responses from cache.
    skipWaiting + clients.claim make a new SW take over right away. */
 
-const CACHE_VERSION = 'unglutened-shell-v4';
+const CACHE_VERSION = 'unglutened-shell-v5';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -42,19 +45,10 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (isApiRequest(url)) {
-    // Network-first for API + health: freshness matters more than offline.
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          // Cache successful, non-opaque responses for offline fallback.
-          if (res && res.status === 200 && res.type === 'basic') {
-            const copy = res.clone();
-            caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match(req))
-    );
+    // Network-ONLY. Never cache or serve user-specific API data from cache —
+    // that could leak one account's data to another or show stale auth state.
+    // If offline, the request simply fails and the app surfaces it honestly.
+    event.respondWith(fetch(req));
     return;
   }
 
