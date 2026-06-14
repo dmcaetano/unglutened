@@ -5,6 +5,32 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Fix "login broken / phantom meals" (SW /api caching) + full feature audit (v1.1.5 "Batman")
+
+**Report** (Diogo): "login is not working, i always have to sign up. but when i sign up with the same
+email it still has my meal — either mixing users data or something else is wrong. test every feature!"
+
+**Root cause** — NOT a data leak. A live API diagnostic showed the backend was perfect (login works,
+duplicate signup 409s, fresh user sees 0 meals, cross-user GET/DELETE → 404). The real account
+(`diogomiguelcaetano@gmail.com`, id 1) had **0 meals in the DB** — yet the app showed a meal. The
+**service worker** was caching authenticated `GET /api/*` responses keyed by URL and serving them on any
+network failure (Render free-tier cold start). So during a cold start it served a stale `/api/auth/status`
+(looks logged-out → "login not working") and a stale `/api/meals` (phantom/old data → "still has my meal").
+
+**Fix (v1.1.5):** `/api/*` + `/healthz` are now **network-only** in the SW — never cached, never served
+from cache. Cache bumped to v5 so existing browsers purge the leaked cache on activate. The app's
+cold-start "waking up" retry already handles the offline case honestly.
+
+**Full feature audit — 40/40 passed** against live (throwaway accounts, real account untouched):
+auth (signup/login/logout/status, duplicate 409, invalid 400, wrong-pw 401, protected 401, cookie attrs);
+meals CRUD + photo vision (Gemini) + irritant_flags update; symptoms CRUD + clean date round-trip;
+correlations (ready:false honest empty AND ready:true after seeding, gluten=high severity) + doctor
+report w/ disclaimer; chatbot add/query/history/clear tools; and **multi-user isolation** (B sees 0 of A's
+meals, B GET/DELETE A's meal → 404, A intact, chat history isolated). Also verified in-browser:
+signup → logout → login works, and `caches` holds **no `/api` entries** after the fix.
+
+---
+
 ## 2026-06-14 — Manual irritant editing via toggle buttons (v1.1.4 "Batman")
 
 **What we did** (Diogo: "we need to be able to change the irritants… cannot do it manually… edit the meal with simple buttons")
