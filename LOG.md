@@ -5,7 +5,7 @@ Newest entries at the top.
 
 ---
 
-## 2026-06-14 — Multi-user accounts (v1.1.0 "Batman")
+## 2026-06-14 — Multi-user accounts (v1.1.1 "Batman")
 
 **What we did**
 

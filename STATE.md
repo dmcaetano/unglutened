@@ -12,7 +12,7 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Where I am
 
-- **Phase:** ✅ Shipped to production — **v1.1.0 "Batman"** (multi-user accounts), live + QA-verified.
+- **Phase:** ✅ Shipped to production — **v1.1.1 "Batman"** (multi-user accounts), live + QA-verified.
 - **Live URL:** https://unglutened.onrender.com — **sign up with your own email + password**;
   each account's meals/gut logs/chat are private to it. (The old shared `APP_PASSWORD` gate is gone.)
 - **GitHub:** https://github.com/dmcaetano/unglutened (public) · **Render:** srv-d8nckgpo3t8c73cm6j40
@@ -47,7 +47,7 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Decisions made
 
-- **2026-06-14** — **Multi-user accounts (v1.1.0 "Batman"):** replaced the single shared
+- **2026-06-14** — **Multi-user accounts (v1.1.1 "Batman"):** replaced the single shared
   `APP_PASSWORD` gate with real email+password sign-up/login. New `users` table (scrypt password
   hashes); `meals`/`symptoms`/`chat_messages` got a `user_id` column; **every data query is scoped
   by `user_id`** so accounts are fully isolated (verified: account B sees none of A's data, and
