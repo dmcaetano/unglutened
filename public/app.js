@@ -422,10 +422,15 @@
   }
 
   function initLog() {
-    $('#photoInput').addEventListener('change', (e) => {
-      const f = e.target.files && e.target.files[0];
-      e.target.value = ''; // allow re-selecting the same file
-      if (f) handlePhoto(f);
+    // Two ways to add a photo: live camera (capture) and the device gallery.
+    ['#photoInputCamera', '#photoInputGallery'].forEach((sel) => {
+      const input = $(sel);
+      if (!input) return;
+      input.addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0];
+        e.target.value = ''; // allow re-selecting the same file
+        if (f) handlePhoto(f);
+      });
     });
 
     $('#mealTime').value = localDatetimeValue();

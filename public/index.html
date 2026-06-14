@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>UnGlutened</title>
   <meta name="description" content="Photograph meals, log gut health, and discover what correlates with how you feel." />
   <meta name="theme-color" content="#0d9488" />
@@ -18,26 +18,33 @@
 <body>
 
   <!-- ===================== AUTH OVERLAY ===================== -->
-  <div id="loginOverlay" class="overlay hidden" aria-hidden="true">
-    <form id="loginForm" class="login-card" novalidate>
-      <img src="/icon.svg" alt="UnGlutened" />
-      <h1>UnGlutened</h1>
-      <p id="authIntro">Log in to continue.</p>
-      <div class="field" style="text-align:left;margin-bottom:8px">
-        <label for="loginEmail">Email</label>
-        <input id="loginEmail" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" />
+  <div id="loginOverlay" class="overlay auth hidden" aria-hidden="true">
+    <div class="auth-bg" aria-hidden="true"></div>
+    <div class="auth-inner">
+      <div class="auth-hero">
+        <span class="auth-logo"><img src="/icon.svg" alt="" /></span>
+        <span class="auth-wordmark">Un<b>Glutened</b></span>
+        <span class="auth-tagline">Photograph your meals. Understand your gut.</span>
       </div>
-      <div class="field" style="text-align:left;margin-bottom:8px">
-        <label for="loginPw">Password</label>
-        <input id="loginPw" type="password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters" />
-      </div>
-      <button id="authSubmit" class="btn block" type="submit">Log in</button>
-      <div id="loginErr" class="err" role="alert"></div>
-      <p class="auth-toggle" style="margin-top:14px;font-size:14px">
-        <span id="authTogglePrompt">New here?</span>
-        <a href="#" id="authToggleLink" role="button">Create an account</a>
-      </p>
-    </form>
+      <form id="loginForm" class="auth-card" novalidate>
+        <p id="authIntro" class="auth-intro">Log in to continue.</p>
+        <div class="field auth-field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" />
+        </div>
+        <div class="field auth-field">
+          <label for="loginPw">Password</label>
+          <input id="loginPw" type="password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters" />
+        </div>
+        <button id="authSubmit" class="btn block auth-submit" type="submit">Log in</button>
+        <div id="loginErr" class="err" role="alert"></div>
+        <p class="auth-toggle">
+          <span id="authTogglePrompt">New here?</span>
+          <a href="#" id="authToggleLink" role="button">Create an account</a>
+        </p>
+      </form>
+      <p class="auth-foot">🔒 Your meals &amp; symptoms stay private to your account · Not medical advice</p>
+    </div>
   </div>
 
   <!-- ===================== APP ===================== -->
@@ -58,12 +65,21 @@
           <p>Snap a photo — we’ll spot the ingredients and any common gut irritants.</p>
         </div>
 
-        <label class="photo-cta" id="photoCta">
+        <div class="photo-cta" id="photoCta">
           <span class="glyph" aria-hidden="true">📷</span>
-          <strong>Take a photo of your meal</strong>
-          <span>Uses your camera. Photos are analysed, only a small thumbnail is stored.</span>
-          <input id="photoInput" type="file" accept="image/*" capture="environment" />
-        </label>
+          <strong>Add a photo of your meal</strong>
+          <span>We’ll spot the ingredients and any common gut irritants. Only a small thumbnail is stored.</span>
+          <div class="photo-actions">
+            <label class="btn photo-btn">
+              <span aria-hidden="true">📸</span> Take photo
+              <input id="photoInputCamera" type="file" accept="image/*" capture="environment" />
+            </label>
+            <label class="btn secondary photo-btn">
+              <span aria-hidden="true">🖼️</span> From gallery
+              <input id="photoInputGallery" type="file" accept="image/*" />
+            </label>
+          </div>
+        </div>
 
         <div id="logResult"></div>
 

@@ -5,6 +5,27 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Auth screen redesign + add meal from gallery (v1.1.2 "Batman")
+
+**What we did** (Diogo: "the design of the sign in menu is terrible. also meals should be added as photos from the gallery")
+
+- **Redesigned the sign-in / sign-up screen**: soft teal gradient backdrop with blurred glow accents,
+  floating logo tile, brand wordmark + tagline, refined card (rounded, soft shadow), larger inputs
+  (16px font to avoid iOS zoom), gradient CTA, clearer mode toggle, and a privacy reassurance footer.
+  Preserved all the element IDs the auth JS depends on (no JS auth-logic changes; cold-start "waking"
+  retry still works).
+- **Add meal from gallery**: the photo CTA now offers two buttons — "📸 Take photo" (camera, `capture`)
+  and "🖼️ From gallery" (`<input accept=image/*>` with no capture). Both feed the same resize→vision
+  pipeline. `initLog` binds both inputs. Verified via Playwright: gallery upload analysed an image to
+  "Idli with Sambar and Chutney".
+- Also removed `maximum-scale=1` from the viewport meta (restores pinch-to-zoom; minor a11y fix).
+
+**What didn't work / open items**
+
+- None. Build bump (refinements to existing photo/auth features), codename stays "Batman".
+
+---
+
 ## 2026-06-14 — Multi-user accounts (v1.1.1 "Batman")
 
 **What we did**
