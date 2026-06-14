@@ -674,6 +674,42 @@
     const descIn = el('textarea', { text: meal.description || '' });
     const timeIn = el('input', { type: 'datetime-local', value: isoToDatetimeLocal(meal.eaten_at) });
 
+    // Editable ingredients: removable chips (tap × to remove) + an add box.
+    let ingredients = (Array.isArray(meal.ingredients) ? meal.ingredients : []).map((ig) => ({
+      name: (ig && ig.name != null) ? String(ig.name) : '',
+      category: (ig && ig.category) || 'other',
+      irritant: !!(ig && ig.irritant),
+      irritant_type: (ig && ig.irritant_type) || null,
+      confidence: (ig && typeof ig.confidence === 'number') ? ig.confidence : 1
+    })).filter((ig) => ig.name);
+    const ingWrap = el('div', { class: 'chips' });
+    const renderIngredients = () => {
+      ingWrap.innerHTML = '';
+      if (!ingredients.length) {
+        ingWrap.appendChild(el('span', { class: 'hint', style: 'font-size:13px', text: 'No ingredients yet — add one below.' }));
+        return;
+      }
+      ingredients.forEach((ig, i) => {
+        ingWrap.appendChild(el('span', { class: 'chip removable' }, [
+          document.createTextNode(ig.name),
+          el('button', { class: 'x', type: 'button', 'aria-label': 'Remove ' + ig.name, onclick: () => { ingredients.splice(i, 1); renderIngredients(); } }, ['×'])
+        ]));
+      });
+    };
+    renderIngredients();
+    const ingInput = el('input', { type: 'text', placeholder: 'Add an ingredient…' });
+    const addIngredient = () => {
+      const v = ingInput.value.trim();
+      if (v && !ingredients.some((x) => x.name.toLowerCase() === v.toLowerCase())) {
+        ingredients.push({ name: v, category: 'other', irritant: false, irritant_type: null, confidence: 1 });
+      }
+      ingInput.value = '';
+      renderIngredients();
+      ingInput.focus();
+    };
+    const ingAddBtn = el('button', { class: 'btn sm', type: 'button', onclick: addIngredient }, ['Add']);
+    ingInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addIngredient(); } });
+
     // Editable irritant flags as simple tap-to-toggle buttons. Start from the
     // current flags (lowercased); show every standard type plus any custom flag
     // already on the meal so nothing is lost.
@@ -700,9 +736,15 @@
     form.appendChild(field('Title', titleIn));
     form.appendChild(field('Details', descIn));
     form.appendChild(field('When', timeIn));
+    form.appendChild(el('div', { class: 'field' }, [
+      el('label', { text: 'Ingredients' }),
+      el('div', { class: 'hint', style: 'margin:0 0 8px', text: 'Tap × to remove one, or add what the photo missed.' }),
+      ingWrap,
+      el('div', { class: 'chip-add' }, [ingInput, ingAddBtn])
+    ]));
     const flagField = el('div', { class: 'field' }, [
       el('label', { text: 'Gut irritants' }),
-      el('div', { class: 'hint', style: 'margin:0 0 8px', text: 'Tap to flag what this meal contains.' }),
+      el('div', { class: 'hint', style: 'margin:0 0 8px', text: 'Tap to flag/unflag — e.g. turn off Gluten if it’s a gluten-free version.' }),
       grid
     ]);
     form.appendChild(flagField);
@@ -715,6 +757,7 @@
           title: titleIn.value.trim(),
           description: descIn.value.trim(),
           eaten_at: datetimeLocalToISO(timeIn.value),
+          ingredients: ingredients,
           irritant_flags: Array.from(flagSet)
         } });
         closeEditModal();

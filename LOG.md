@@ -5,6 +5,24 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Editable ingredients (add/remove) in the meal editor (v1.1.6 "Batman")
+
+**What we did** (Diogo: "i still cannot remove ingredients with a single tap or add new ones. same with
+irritants in case something is gluten or lactose free but looks otherwise")
+
+- The meal Edit modal now has a full **Ingredients** editor: each ingredient is a removable chip
+  (tap × to remove) plus an "Add an ingredient…" box (type + Add / Enter). Saves the updated
+  `ingredients` array via `PUT /api/meals/:id` (backend already supported it). Ingredients feed the
+  correlation engine, so corrections improve Insights.
+- Clarified the existing **irritant toggles** copy ("Tap to flag/unflag — e.g. turn off Gluten if it's
+  a gluten-free version") — directly addresses the gluten-free/lactose-free case. (The toggles shipped
+  in v1.1.4; Diogo likely hadn't seen them due to the stale-SW bug fixed in v1.1.5.)
+- Verified in-browser end-to-end: opened a seeded "Sandwich" (Bread/Cheese/Lettuce, gluten+dairy) →
+  removed Cheese, added Tomato, turned Dairy off → saved → persisted as ingredients
+  [Bread, Lettuce, Tomato] and irritants [gluten].
+
+---
+
 ## 2026-06-14 — Fix "login broken / phantom meals" (SW /api caching) + full feature audit (v1.1.5 "Batman")
 
 **Report** (Diogo): "login is not working, i always have to sign up. but when i sign up with the same

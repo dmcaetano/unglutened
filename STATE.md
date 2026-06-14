@@ -12,9 +12,9 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Where I am
 
-- **Phase:** ✅ Shipped to production — **v1.1.5 "Batman"**, live + fully QA-verified (40/40 feature tests pass).
-  Multi-user accounts, redesigned auth, add-meal-from-gallery, manual irritant toggle editing, and the
-  service-worker `/api` caching fix (the cause of the "login broken / phantom meals" report).
+- **Phase:** ✅ Shipped to production — **v1.1.6 "Batman"**, live + QA-verified.
+  Multi-user accounts, redesigned auth, add-meal-from-gallery, manual ingredient editing (add/remove)
+  + irritant toggles, network-only `/api` SW (fixed the "login broken / phantom meals" report).
 - **Live URL:** https://unglutened.onrender.com — **sign up with your own email + password**;
   each account's meals/gut logs/chat are private to it. (The old shared `APP_PASSWORD` gate is gone.)
 - **GitHub:** https://github.com/dmcaetano/unglutened (public) · **Render:** srv-d8nckgpo3t8c73cm6j40
