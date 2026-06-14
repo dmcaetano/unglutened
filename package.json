@@ -1,6 +1,6 @@
 {
   "name": "unglutened",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "private": true,
   "description": "UnGlutened — personal food/gut-health correlation tracker with AI chatbot",
   "type": "commonjs",

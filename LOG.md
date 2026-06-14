@@ -5,6 +5,21 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Manual irritant editing via toggle buttons (v1.1.4 "Batman")
+
+**What we did** (Diogo: "we need to be able to change the irritants… cannot do it manually… edit the meal with simple buttons")
+
+- Replaced the meal edit modal's fiddly removable-chips + free-text "Add" control with a **tap-to-toggle
+  grid** of the 15 standard irritant types (Gluten, Dairy, Lactose, Onion/garlic, Legumes, High FODMAP,
+  Spicy, Caffeine, Alcohol, Sweeteners, Fried/fatty, Egg, Soy, Histamine, Other) plus any custom flag
+  already on the meal. Tapping toggles it; selected = amber with a ✓. Saves to `irritant_flags` via the
+  existing `PUT /api/meals/:id`.
+- Added `IRRITANT_TYPES`/`IRRITANT_LABELS` + `.irritant-toggle` styles in the frontend (mirrors
+  `lib/vision.js`). Verified end-to-end: toggled Gluten+Spicy on a meal → saved → persisted
+  (`["gluten","spicy"]`) → shown as chips in History. No backend change needed.
+
+---
+
 ## 2026-06-14 — Auth screen redesign + add meal from gallery (v1.1.2 "Batman")
 
 **What we did** (Diogo: "the design of the sign in menu is terrible. also meals should be added as photos from the gallery")

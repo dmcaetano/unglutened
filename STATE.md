@@ -12,8 +12,8 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Where I am
 
-- **Phase:** ✅ Shipped to production — **v1.1.3 "Batman"**, live + QA-verified. (Multi-user accounts +
-  redesigned auth screen + add-meal-from-gallery + network-first service worker so updates land immediately.)
+- **Phase:** ✅ Shipped to production — **v1.1.4 "Batman"**, live + QA-verified. (Multi-user accounts,
+  redesigned auth, add-meal-from-gallery, network-first SW, and manual irritant editing via toggle buttons.)
 - **Live URL:** https://unglutened.onrender.com — **sign up with your own email + password**;
   each account's meals/gut logs/chat are private to it. (The old shared `APP_PASSWORD` gate is gone.)
 - **GitHub:** https://github.com/dmcaetano/unglutened (public) · **Render:** srv-d8nckgpo3t8c73cm6j40

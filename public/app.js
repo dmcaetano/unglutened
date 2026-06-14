@@ -388,6 +388,17 @@
     return String(f || '').replace(/_/g, ' ');
   }
 
+  // Common digestive-irritant types (mirrors lib/vision.js IRRITANT_TYPES) used for
+  // the tap-to-toggle buttons when editing a meal.
+  const IRRITANT_TYPES = ['gluten', 'dairy', 'lactose', 'fructan_onion_garlic', 'legumes', 'high_fodmap', 'spicy', 'caffeine', 'alcohol', 'artificial_sweetener', 'fried_fatty', 'egg', 'soy', 'histamine', 'other'];
+  const IRRITANT_LABELS = {
+    gluten: 'Gluten', dairy: 'Dairy', lactose: 'Lactose', fructan_onion_garlic: 'Onion / garlic',
+    legumes: 'Legumes', high_fodmap: 'High FODMAP', spicy: 'Spicy', caffeine: 'Caffeine',
+    alcohol: 'Alcohol', artificial_sweetener: 'Sweeteners', fried_fatty: 'Fried / fatty',
+    egg: 'Egg', soy: 'Soy', histamine: 'Histamine', other: 'Other'
+  };
+  function irritantLabel(f) { return IRRITANT_LABELS[f] || prettyFlag(f); }
+
   async function handlePhoto(file) {
     const box = $('#logResult');
     box.innerHTML = '';
@@ -663,29 +674,37 @@
     const descIn = el('textarea', { text: meal.description || '' });
     const timeIn = el('input', { type: 'datetime-local', value: isoToDatetimeLocal(meal.eaten_at) });
 
-    // Editable irritant flags as removable chips + add control.
-    let flags = (Array.isArray(meal.irritant_flags) ? meal.irritant_flags : []).slice();
-    const chipWrap = el('div', { class: 'chips' });
-    const renderFlags = () => {
-      chipWrap.innerHTML = '';
-      if (!flags.length) chipWrap.appendChild(el('span', { class: 'hint', style: 'font-size:13px;color:var(--ink-faint)', text: 'No irritants flagged.' }));
-      flags.forEach((f, i) => chipWrap.appendChild(el('span', { class: 'chip irritant removable' }, [
-        document.createTextNode(prettyFlag(f)),
-        el('button', { class: 'x', type: 'button', 'aria-label': 'Remove', onclick: () => { flags.splice(i, 1); renderFlags(); } }, ['×'])
-      ])));
-    };
-    renderFlags();
-    const flagInput = el('input', { type: 'text', placeholder: 'e.g. gluten' });
-    const flagAdd = el('button', { class: 'btn sm', type: 'button', onclick: () => {
-      const v = flagInput.value.trim().toLowerCase().replace(/\s+/g, '_');
-      if (v && flags.indexOf(v) === -1) flags.push(v);
-      flagInput.value = ''; renderFlags();
-    } }, ['Add']);
+    // Editable irritant flags as simple tap-to-toggle buttons. Start from the
+    // current flags (lowercased); show every standard type plus any custom flag
+    // already on the meal so nothing is lost.
+    const flagSet = new Set((Array.isArray(meal.irritant_flags) ? meal.irritant_flags : []).map((f) => String(f).toLowerCase()));
+    const types = IRRITANT_TYPES.slice();
+    flagSet.forEach((f) => { if (types.indexOf(f) === -1) types.push(f); });
+
+    const grid = el('div', { class: 'chips irritant-grid' });
+    types.forEach((t) => {
+      const on = flagSet.has(t);
+      const chip = el('button', {
+        type: 'button',
+        class: 'chip selectable irritant-toggle',
+        'aria-pressed': on ? 'true' : 'false',
+        text: irritantLabel(t)
+      });
+      chip.addEventListener('click', () => {
+        if (flagSet.has(t)) { flagSet.delete(t); chip.setAttribute('aria-pressed', 'false'); }
+        else { flagSet.add(t); chip.setAttribute('aria-pressed', 'true'); }
+      });
+      grid.appendChild(chip);
+    });
 
     form.appendChild(field('Title', titleIn));
     form.appendChild(field('Details', descIn));
     form.appendChild(field('When', timeIn));
-    const flagField = el('div', { class: 'field' }, [el('label', { text: 'Irritant flags' }), chipWrap, el('div', { class: 'chip-add' }, [flagInput, flagAdd])]);
+    const flagField = el('div', { class: 'field' }, [
+      el('label', { text: 'Gut irritants' }),
+      el('div', { class: 'hint', style: 'margin:0 0 8px', text: 'Tap to flag what this meal contains.' }),
+      grid
+    ]);
     form.appendChild(flagField);
 
     form.appendChild(el('button', { class: 'btn block', type: 'submit' }, ['Save meal']));
@@ -696,7 +715,7 @@
           title: titleIn.value.trim(),
           description: descIn.value.trim(),
           eaten_at: datetimeLocalToISO(timeIn.value),
-          irritant_flags: flags
+          irritant_flags: Array.from(flagSet)
         } });
         closeEditModal();
         toast('Meal updated', 'ok');

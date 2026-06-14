@@ -248,6 +248,12 @@ input:focus, textarea:focus, select:focus {
 .chip.selectable { cursor: pointer; background: var(--surface); }
 .chip.selectable[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: #b7e1da; }
 
+/* Irritant toggle buttons (meal edit): off = neutral, on = warning/amber. */
+.irritant-grid { gap: 8px; }
+.chip.selectable.irritant-toggle { padding: 9px 13px; font-size: 13.5px; }
+.chip.selectable.irritant-toggle[aria-pressed="true"] { background: var(--warn-soft); color: var(--warn); border-color: #f3c9b3; }
+.chip.selectable.irritant-toggle[aria-pressed="true"]::before { content: "✓ "; font-weight: 700; }
+
 .chip-add { display: flex; gap: 7px; margin-top: 9px; }
 .chip-add input { min-height: 38px; }
 .chip-add .btn { min-height: 38px; }
