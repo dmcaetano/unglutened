@@ -5,6 +5,24 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Real PNG home-screen icons for phone install (v1.1.7 "Batman")
+
+**Why** (Diogo: "how can i install the icon and run it on my phone?"). The app was installable, but the
+only icon was an SVG — iOS does NOT render SVG for the home-screen icon, so an installed iPhone icon
+would have been a screenshot of the page, not the brand mark.
+
+**What we did**
+- Generated full-bleed PNG icons (180/192/512) by rendering the brand SVG (rounded corners removed so
+  iOS/Android apply their own mask) via headless Chromium → `public/icon-180.png`, `icon-192.png`,
+  `icon-512.png`. No image-lib dependency added.
+- `index.html`: `apple-touch-icon` → `/icon-180.png` (+ a 192 PNG `rel=icon`). `manifest.webmanifest`:
+  PNG icons 192/512 with `purpose: any` + `maskable` (SVG kept as a fallback). `sw.js`: added the PNGs
+  to the precache list, cache bumped to v6.
+- Install steps (also in STATE.md): iOS Safari → Share → Add to Home Screen; Android Chrome → ⋮ →
+  Add to Home screen / Install app.
+
+---
+
 ## 2026-06-14 — Editable ingredients (add/remove) in the meal editor (v1.1.6 "Batman")
 
 **What we did** (Diogo: "i still cannot remove ingredients with a single tap or add new ones. same with

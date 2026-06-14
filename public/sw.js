@@ -9,14 +9,17 @@
      different session. So we never store or serve API responses from cache.
    skipWaiting + clients.claim make a new SW take over right away. */
 
-const CACHE_VERSION = 'unglutened-shell-v5';
+const CACHE_VERSION = 'unglutened-shell-v6';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
   '/app.js',
   '/styles.css',
   '/manifest.webmanifest',
-  '/icon.svg'
+  '/icon.svg',
+  '/icon-180.png',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
