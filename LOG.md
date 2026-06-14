@@ -5,6 +5,31 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Text-logged meals get AI-inferred ingredients + allergens (v1.1.8 "Batman")
+
+**Why** (Diogo: "i logged sushi written and it did not suggest allergens — the LLM should guess allergens
+from the described food").
+
+**What we did** (built via a workflow: backend + frontend builders against a frozen taxonomy + verifier)
+- `lib/vision.js`: added `analyzeMealText({title, description})` — infers the likely ingredients of a
+  dish from its name/description (text-only, DeepSeek V4 Flash) and flags allergens/irritants, same
+  return shape as `analyzeMeal`, never throws.
+- Expanded the flag **taxonomy to the major food allergens** + digestive irritants (20 items): gluten,
+  dairy, lactose, egg, soy, peanut, tree_nuts, fish, shellfish, sesame, fructan_onion_garlic, legumes,
+  high_fodmap, spicy, caffeine, alcohol, artificial_sweetener, fried_fatty, histamine, other. Kept
+  `lib/vision.js` IRRITANT_TYPES and `public/app.js` IRRITANT_TYPES/LABELS identical (verifier-checked).
+- `routes/meals.js`: the manual (no-photo) create now calls `analyzeMealText` when the caller didn't
+  supply ingredients/flags — so the typed-meal form gets AI analysis. Chatbot-supplied data is left
+  untouched; falls back to plain create if the AI errors.
+- `public/app.js`: manual-form submit shows a "Working out the likely ingredients…" spinner; the
+  expanded allergen toggles appear in the meal-edit grid automatically.
+- **Verified end-to-end:** Sushi → fish/soy/sesame (+ rice, nori, raw fish, soy sauce, sesame);
+  Pesto → gluten/tree_nuts/dairy/onion-garlic; "Ramen with pork and egg" → gluten/egg/soy/onion-garlic/
+  sesame; plain chicken & rice → no flags. UI shows loading → result card with chips. ~5–16s latency
+  (DeepSeek), covered by the spinner.
+
+---
+
 ## 2026-06-14 — Real PNG home-screen icons for phone install (v1.1.7 "Batman")
 
 **Why** (Diogo: "how can i install the icon and run it on my phone?"). The app was installable, but the

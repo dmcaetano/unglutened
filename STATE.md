@@ -12,9 +12,10 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Where I am
 
-- **Phase:** ✅ Shipped to production — **v1.1.7 "Batman"**, live + QA-verified. Installable PWA with
-  real PNG home-screen icons (iOS apple-touch-icon + Android maskable). Multi-user accounts, redesigned
-  auth, add-meal-from-gallery, ingredient editing + irritant toggles, network-only `/api` SW.
+- **Phase:** ✅ Shipped to production — **v1.1.8 "Batman"**, live + QA-verified. Text-logged meals now get
+  AI-inferred ingredients + allergen/irritant flags (DeepSeek), taxonomy expanded to the major allergens.
+  Installable PWA w/ PNG icons, multi-user accounts, photo+gallery vision, ingredient editing + irritant
+  toggles, network-only `/api` SW.
 - **Install on phone:** open the live URL → iOS Safari: Share → "Add to Home Screen"; Android Chrome:
   ⋮ menu → "Add to Home screen" / "Install app". Runs full-screen, stays logged in 30 days.
 - **Live URL:** https://unglutened.onrender.com — **sign up with your own email + password**;

@@ -389,13 +389,16 @@
   }
 
   // Common digestive-irritant types (mirrors lib/vision.js IRRITANT_TYPES) used for
-  // the tap-to-toggle buttons when editing a meal.
-  const IRRITANT_TYPES = ['gluten', 'dairy', 'lactose', 'fructan_onion_garlic', 'legumes', 'high_fodmap', 'spicy', 'caffeine', 'alcohol', 'artificial_sweetener', 'fried_fatty', 'egg', 'soy', 'histamine', 'other'];
+  // the tap-to-toggle buttons when editing a meal. FROZEN taxonomy — must match
+  // lib/vision.js IRRITANT_TYPES / IRRITANT_LABELS verbatim.
+  const IRRITANT_TYPES = ['gluten', 'dairy', 'lactose', 'egg', 'soy', 'peanut', 'tree_nuts', 'fish', 'shellfish', 'sesame', 'fructan_onion_garlic', 'legumes', 'high_fodmap', 'spicy', 'caffeine', 'alcohol', 'artificial_sweetener', 'fried_fatty', 'histamine', 'other'];
   const IRRITANT_LABELS = {
-    gluten: 'Gluten', dairy: 'Dairy', lactose: 'Lactose', fructan_onion_garlic: 'Onion / garlic',
-    legumes: 'Legumes', high_fodmap: 'High FODMAP', spicy: 'Spicy', caffeine: 'Caffeine',
-    alcohol: 'Alcohol', artificial_sweetener: 'Sweeteners', fried_fatty: 'Fried / fatty',
-    egg: 'Egg', soy: 'Soy', histamine: 'Histamine', other: 'Other'
+    gluten: 'Gluten', dairy: 'Dairy', lactose: 'Lactose', egg: 'Egg', soy: 'Soy',
+    peanut: 'Peanut', tree_nuts: 'Tree nuts', fish: 'Fish', shellfish: 'Shellfish',
+    sesame: 'Sesame', fructan_onion_garlic: 'Onion / garlic', legumes: 'Legumes',
+    high_fodmap: 'High FODMAP', spicy: 'Spicy', caffeine: 'Caffeine', alcohol: 'Alcohol',
+    artificial_sweetener: 'Sweeteners', fried_fatty: 'Fried / fatty', histamine: 'Histamine',
+    other: 'Other'
   };
   function irritantLabel(f) { return IRRITANT_LABELS[f] || prettyFlag(f); }
 
@@ -453,6 +456,12 @@
       if (!title && !description) { toast('Add a title or details first', 'error'); return; }
       const btn = $('#manualMealForm button[type=submit]');
       btn.disabled = true;
+      // Show a spinner while the text meal is analysed (mirrors handlePhoto).
+      const box = $('#logResult');
+      box.innerHTML = '';
+      box.appendChild(el('div', { class: 'card' }, [
+        el('div', { class: 'loading-row' }, [el('span', { class: 'spinner' }), el('span', { text: 'Working out the likely ingredients…' })])
+      ]));
       try {
         const body = { title: title, description: description, eaten_at: datetimeLocalToISO($('#mealTime').value) };
         const result = await api('/api/meals', { method: 'POST', body: body });
@@ -460,7 +469,7 @@
         $('#mealTitle').value = ''; $('#mealDesc').value = ''; $('#mealTime').value = localDatetimeValue();
         renderMealResult(meal, { thumb: meal.thumb });
         toast('Meal logged', 'ok');
-      } catch (err) { toast(err.message, 'error'); }
+      } catch (err) { box.innerHTML = ''; toast(err.message, 'error'); }
       btn.disabled = false;
     });
   }

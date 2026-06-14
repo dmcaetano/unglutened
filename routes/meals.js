@@ -77,6 +77,40 @@ router.post("/", async (req, res) => {
     }
 
     // Manual create (no photo).
+    // If the caller supplied neither ingredients nor irritant_flags (e.g. a
+    // plain text-logged meal, NOT the chatbot), but there is a title or
+    // description, infer ingredients + flags from the text via the AI helper.
+    const hasIngredients = Array.isArray(body.ingredients);
+    const hasFlags = Array.isArray(body.irritant_flags);
+    const hasText =
+      (title !== undefined && title !== null && String(title).trim() !== "") ||
+      (description !== undefined &&
+        description !== null &&
+        String(description).trim() !== "");
+
+    if (!hasIngredients && !hasFlags && hasText) {
+      const ai = await vision.analyzeMealText({ title, description });
+      const aiIngredients = Array.isArray(ai.ingredients) ? ai.ingredients : [];
+      const aiFlags = Array.isArray(ai.irritant_flags) ? ai.irritant_flags : [];
+
+      // Use AI result only if it succeeded and produced something useful.
+      if (!ai.error && (aiIngredients.length || aiFlags.length)) {
+        const meal = await store.createMeal(req.userId, {
+          eaten_at: eaten_at || undefined,
+          title: ai.title || title || "Meal",
+          description: description !== undefined ? description : null,
+          ingredients: aiIngredients,
+          irritant_flags: aiFlags,
+          summary: ai.summary || "",
+          thumb: thumb !== undefined ? thumb : null,
+          ai_raw: ai,
+          source: "manual",
+        });
+        return res.json({ meal });
+      }
+      // else: fall through to the plain manual create below.
+    }
+
     const meal = await store.createMeal(req.userId, {
       eaten_at: eaten_at || undefined,
       title: title !== undefined ? title : null,
