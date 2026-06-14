@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: unglutened
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_VISION_MODEL
+        sync: false
+      - key: OPENROUTER_CHAT_MODEL
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: DB_SCHEMA
+        sync: false
+      - key: PUBLIC_URL
+        sync: false

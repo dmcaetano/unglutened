@@ -1,0 +1,27 @@
+{
+  "name": "UnGlutened — food & gut health tracker",
+  "short_name": "UnGlutened",
+  "description": "Photograph meals, log gut health, and discover what correlates with how you feel.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f7f5",
+  "theme_color": "#0d9488",
+  "categories": ["health", "lifestyle", "medical"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

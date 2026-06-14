@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>UnGlutened</title>
+  <meta name="description" content="Photograph meals, log gut health, and discover what correlates with how you feel." />
+  <meta name="theme-color" content="#0d9488" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="UnGlutened" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <!-- ===================== LOGIN OVERLAY ===================== -->
+  <div id="loginOverlay" class="overlay hidden" aria-hidden="true">
+    <form id="loginForm" class="login-card" novalidate>
+      <img src="/icon.svg" alt="UnGlutened" />
+      <h1>UnGlutened</h1>
+      <p>Enter your passcode to continue.</p>
+      <div class="field" style="text-align:left;margin-bottom:8px">
+        <label for="loginPw">Passcode</label>
+        <input id="loginPw" type="password" autocomplete="current-password" inputmode="text" placeholder="••••••••" />
+      </div>
+      <button class="btn block" type="submit">Unlock</button>
+      <div id="loginErr" class="err" role="alert"></div>
+    </form>
+  </div>
+
+  <!-- ===================== APP ===================== -->
+  <div id="app" aria-hidden="false">
+
+    <header class="topbar">
+      <span class="brand"><img src="/icon.svg" alt="" /> <span>Un<b>Glutened</b></span></span>
+      <span class="spacer"></span>
+      <button id="openSettings" class="iconbtn" type="button" aria-label="Settings">⚙</button>
+    </header>
+
+    <main>
+
+      <!-- ---------- LOG ---------- -->
+      <section id="view-log" class="view active" aria-labelledby="log-h">
+        <div class="view-head">
+          <h1 id="log-h">Log a meal</h1>
+          <p>Snap a photo — we’ll spot the ingredients and any common gut irritants.</p>
+        </div>
+
+        <label class="photo-cta" id="photoCta">
+          <span class="glyph" aria-hidden="true">📷</span>
+          <strong>Take a photo of your meal</strong>
+          <span>Uses your camera. Photos are analysed, only a small thumbnail is stored.</span>
+          <input id="photoInput" type="file" accept="image/*" capture="environment" />
+        </label>
+
+        <div id="logResult"></div>
+
+        <div class="card" id="manualMealCard">
+          <h2>Log without a photo</h2>
+          <p class="hint">No picture? Describe the meal instead.</p>
+          <form id="manualMealForm" novalidate>
+            <div class="field">
+              <label for="mealTitle">What did you eat?</label>
+              <input id="mealTitle" type="text" placeholder="e.g. Chicken & rice bowl" />
+            </div>
+            <div class="field">
+              <label for="mealDesc">Details <span class="sub">(optional)</span></label>
+              <textarea id="mealDesc" placeholder="Ingredients, how it was cooked, portion…"></textarea>
+            </div>
+            <div class="field">
+              <label for="mealTime">When</label>
+              <input id="mealTime" type="datetime-local" />
+            </div>
+            <button class="btn block" type="submit">Save meal</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ---------- GUT ---------- -->
+      <section id="view-gut" class="view" aria-labelledby="gut-h">
+        <div class="view-head">
+          <h1 id="gut-h">Gut check-in</h1>
+          <p>A quick, private daily snapshot of how you’re feeling.</p>
+        </div>
+
+        <div class="card">
+          <form id="gutForm" novalidate>
+            <div class="field">
+              <label for="gutDate">Date</label>
+              <input id="gutDate" type="date" />
+            </div>
+
+            <div class="scale" data-scale="bloating" data-min="0" data-max="5">
+              <div class="scale-head"><label>Bloating</label><span class="scale-val">—</span></div>
+              <div class="seg" role="group" aria-label="Bloating, 0 none to 5 severe"></div>
+              <div class="scale-desc">0 = none · 5 = severe</div>
+            </div>
+
+            <div class="scale" data-scale="bristol" data-min="1" data-max="7">
+              <div class="scale-head"><label>Stool consistency <span class="sub">(Bristol scale)</span></label><span class="scale-val">—</span></div>
+              <div class="seg small" role="group" aria-label="Bristol stool scale 1 to 7"></div>
+              <div class="scale-desc">Tap to select. Type 4 is considered ideal.</div>
+            </div>
+
+            <div class="scale" data-scale="gas" data-min="0" data-max="5">
+              <div class="scale-head"><label>Gas</label><span class="scale-val">—</span></div>
+              <div class="seg" role="group" aria-label="Gas, 0 none to 5 severe"></div>
+              <div class="scale-desc">0 = none · 5 = a lot</div>
+            </div>
+
+            <div class="scale" data-scale="cramps" data-min="0" data-max="5">
+              <div class="scale-head"><label>Cramps</label><span class="scale-val">—</span></div>
+              <div class="seg" role="group" aria-label="Cramps, 0 none to 5 severe"></div>
+              <div class="scale-desc">0 = none · 5 = severe</div>
+            </div>
+
+            <div class="scale" data-scale="energy" data-min="0" data-max="5">
+              <div class="scale-head"><label>Energy</label><span class="scale-val">—</span></div>
+              <div class="seg" role="group" aria-label="Energy, 0 low to 5 high"></div>
+              <div class="scale-desc">0 = drained · 5 = great</div>
+            </div>
+
+            <div class="scale" data-scale="mood" data-min="0" data-max="5">
+              <div class="scale-head"><label>Mood</label><span class="scale-val">—</span></div>
+              <div class="seg" role="group" aria-label="Mood, 0 low to 5 high"></div>
+              <div class="scale-desc">0 = low · 5 = great</div>
+            </div>
+
+            <div class="field">
+              <label>Other symptoms <span class="sub">(optional)</span></label>
+              <div class="chips" id="gutOtherChips"></div>
+              <div class="chip-add">
+                <input id="gutOtherInput" type="text" placeholder="Add a symptom…" />
+                <button class="btn sm" type="button" id="gutOtherAdd">Add</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="gutNotes">Notes <span class="sub">(optional)</span></label>
+              <textarea id="gutNotes" placeholder="Anything else worth remembering…"></textarea>
+            </div>
+
+            <button class="btn block" type="submit">Save check-in</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ---------- HISTORY ---------- -->
+      <section id="view-history" class="view" aria-labelledby="hist-h">
+        <div class="view-head">
+          <h1 id="hist-h">History</h1>
+          <p>Everything you’ve logged, newest first.</p>
+        </div>
+        <div id="historyList" class="timeline"></div>
+      </section>
+
+      <!-- ---------- INSIGHTS ---------- -->
+      <section id="view-insights" class="view" aria-labelledby="ins-h">
+        <div class="view-head">
+          <h1 id="ins-h">Insights</h1>
+          <p>What tends to line up with how your gut feels.</p>
+        </div>
+
+        <div class="window-pick" role="group" aria-label="Correlation window">
+          <button type="button" data-window="1" aria-pressed="true">Same day</button>
+          <button type="button" data-window="2" aria-pressed="false">Within 2 days</button>
+        </div>
+
+        <div id="insightsList"></div>
+
+        <div class="card" style="margin-top:6px">
+          <h2>Doctor report</h2>
+          <p class="hint">A shareable, plain-language summary for your clinician.</p>
+          <button class="btn block secondary" type="button" id="genReport">Generate doctor report</button>
+          <div id="reportArea"></div>
+        </div>
+      </section>
+
+      <!-- ---------- CHAT ---------- -->
+      <section id="view-chat" class="view" aria-labelledby="chat-h">
+        <div class="view-head">
+          <h1 id="chat-h">Assistant</h1>
+          <p>Ask about your logs, or tell me to add, edit, or delete entries.</p>
+        </div>
+        <div class="chat-view">
+          <div class="chat-scroll" id="chatScroll" aria-live="polite"></div>
+          <div class="chat-examples" id="chatExamples"></div>
+          <form class="chat-input-row" id="chatForm" novalidate>
+            <input id="chatInput" type="text" placeholder="Message UnGlutened…" autocomplete="off" />
+            <button class="btn" type="submit" aria-label="Send">Send</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="tabbar" id="tabbar" aria-label="Primary">
+      <button type="button" data-tab="log" aria-current="page"><span class="ic" aria-hidden="true">📷</span>Log</button>
+      <button type="button" data-tab="gut"><span class="ic" aria-hidden="true">🫧</span>Gut</button>
+      <button type="button" data-tab="history"><span class="ic" aria-hidden="true">🕑</span>History</button>
+      <button type="button" data-tab="insights"><span class="ic" aria-hidden="true">📈</span>Insights</button>
+      <button type="button" data-tab="chat"><span class="ic" aria-hidden="true">💬</span>Chat</button>
+    </nav>
+  </div>
+
+  <!-- ===================== SETTINGS SHEET ===================== -->
+  <div class="sheet-backdrop" id="settingsBackdrop"></div>
+  <div class="sheet" id="settingsSheet" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="handle" aria-hidden="true"></div>
+    <h2>Settings</h2>
+    <div class="row"><span class="k">App version</span><span class="v" id="setVersion">—</span></div>
+    <div class="row"><span class="k">Database</span><span class="v" id="setDb">—</span></div>
+    <div class="row"><span class="k">Meals logged</span><span class="v" id="setMeals">—</span></div>
+    <div class="row"><span class="k">Gut check-ins</span><span class="v" id="setSymptoms">—</span></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn ghost" type="button" id="clearChatBtn">Clear chat history</button>
+      <button class="btn ghost" type="button" id="logoutBtn" style="display:none">Log out</button>
+    </div>
+    <button class="btn block secondary" type="button" id="closeSettings" style="margin-top:12px">Close</button>
+    <p class="footer-note">Self-tracking tool, not medical advice.</p>
+  </div>
+
+  <!-- ===================== EDIT MODAL ===================== -->
+  <div class="modal-backdrop" id="editBackdrop" role="dialog" aria-modal="true" aria-label="Edit entry">
+    <div class="modal" id="editModal">
+      <div class="modal-head">
+        <h2 id="editTitle">Edit</h2>
+        <button class="iconbtn" type="button" id="editClose" aria-label="Close">✕</button>
+      </div>
+      <div id="editBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

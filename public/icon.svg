@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="UnGlutened">
+  <defs>
+    <linearGradient id="ug-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="1" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="ug-leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a7f3d0"/>
+      <stop offset="1" stop-color="#5eead4"/>
+    </linearGradient>
+  </defs>
+  <!-- Maskable-friendly: solid rounded background filling the full canvas -->
+  <rect width="512" height="512" rx="112" fill="url(#ug-bg)"/>
+  <!-- Stylised gut / leaf mark, centred within the safe zone -->
+  <g fill="none" stroke="url(#ug-leaf)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Gut coil -->
+    <path d="M176 132
+             c0 -34 28 -56 60 -56
+             c40 0 64 30 64 66
+             c0 34 -28 52 -60 52
+             c-30 0 -52 18 -52 46
+             c0 30 26 50 58 50
+             c36 0 62 -24 62 -60"/>
+  </g>
+  <!-- Leaf accent growing from the coil, signalling gentle / plant-friendly -->
+  <g fill="url(#ug-leaf)">
+    <path d="M308 300
+             c44 -8 84 8 108 44
+             c-40 30 -84 32 -116 8
+             c-20 -16 -22 -42 8 -52 z"/>
+  </g>
+  <!-- Leaf vein -->
+  <path d="M312 318 q44 6 90 28" fill="none" stroke="#0f766e" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+  <!-- Small "spark of wellbeing" dot -->
+  <circle cx="236" cy="396" r="16" fill="url(#ug-leaf)"/>
+</svg>
