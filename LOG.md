@@ -5,6 +5,46 @@ Newest entries at the top.
 
 ---
 
+## 2026-06-14 — Built, QA'd, and shipped to production (v1.0.1 → v1.0.2 "Iron Man")
+
+**What we did**
+
+- Ran the build workflow (5 parallel agents from `CONTRACT.md` + 3 integration verifiers) — all
+  14 JS files passed `node --check`, verifiers returned ok.
+- `npm install`, created local `.env` (real Neon URL, OpenRouter key, `APP_PASSWORD`), booted
+  `node server.js` against Neon over 443.
+- Full QA (curl + Playwright, mobile viewport) feature-by-feature: auth gate, photo→ingredients
+  (Gemini, "Chicken Biryani" + irritant flags), gut check-in (Bristol labels), history with inline
+  Edit/Delete, edit modal prefilled, Insights ready-state (gluten/dairy high, rice protective) +
+  honest empty state, doctor report (copy/download/print), chatbot query + add + update + delete by
+  command (DeepSeek tool-calling).
+- Pushed to GitHub (public: dmcaetano/unglutened), created Render web service via API
+  (srv-d8nckgpo3t8c73cm6j40, free tier, frankfurt), set env vars, deployed. Live + db:up.
+- Re-ran key flows on the live URL (auth Secure-cookie over HTTPS, symptom, DeepSeek chat, Gemini
+  vision all 200 when warm). Cleared all test/demo data for a clean alpha start.
+
+**Bugs found & fixed during QA**
+
+- `@neondatabase/serverless@0.10.4` had no `sql.query()` (only tagged templates) → migrate failed.
+  Upgraded driver to `^1.1.0` (which has `.query(text, params)`).
+- `logged_for` (DATE) round-tripped with a timezone shift (`2026-06-14` → `2026-06-13T23:00Z`).
+  Fixed by normalizing DATE columns to a clean `YYYY-MM-DD` string from the Date's LOCAL components
+  in `store.normalizeSymptom` (driver ignores custom type parsers on the HTTP path).
+- Chatbot "what did I eat today?" returned nothing: `list_meals` with `to="YYYY-MM-DD"` compared
+  `eaten_at <= midnight`, excluding same-day meals. Fixed with an end-of-day bound expansion for
+  date-only `to` filters on the timestamp column (`store.endOfDayBound`).
+- Render free-tier cold start 404s the first request for ~30-60s during wake; the boot silently
+  fell through to a broken empty view. Added a resilient `checkAuth()` retry with a "Waking up the
+  server…" overlay state that transitions to login once the server responds (verified by stopping
+  the server, reloading → waking shown, restarting → auto-recovered to login). Shipped as v1.0.2.
+
+**What didn't work / open items**
+
+- Free-tier cold start remains (acceptable per Track 2); a keep-warm ping would remove it.
+- Insights only "ready" after ≥4 gut-log days + an item on ≥3 days — by design (no fabrication).
+
+---
+
 ## 2026-06-14 — Initial build (v1 scaffold from CONTRACT.md)
 
 **What we did**

@@ -12,31 +12,24 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Where I am
 
-- **Phase:** Initial v1 build, scaffolded from `CONTRACT.md` (the single source of truth).
-- Repo skeleton and the build contract are in place. The build is split across parallel agents,
-  each owning a fixed file list and bound to the exact module interfaces / API shapes / DB schema
-  defined in `CONTRACT.md`.
-- This agent has authored the project docs: `README.md`, `STATE.md`, `LOG.md`.
-- Other agents are authoring (per contract): `db.js`, `lib/*` (`store`, `openrouter`, `vision`,
-  `correlate`, `report`, `chatAgent`, `auth`), `routes/*`, `server.js`, the `public/` PWA, and the
-  deploy files (`render.yaml`, `.gitignore`, `.env.example`, `version.json`, `package.json`).
-- Nothing has been installed, committed, or run yet (per contract, the orchestrator does
-  `npm install` / `git` / server start).
+- **Phase:** ✅ Shipped to production — **v1.0.3 "Iron Man"**, live and QA-verified.
+- **Live URL:** https://unglutened.onrender.com  · **Passcode:** set via `APP_PASSWORD` env var
+  (shared with the tester out-of-band — never commit it; the repo is public).
+- **GitHub:** https://github.com/dmcaetano/unglutened (public) · **Render:** srv-d8nckgpo3t8c73cm6j40
+- All contract files built (5 parallel agents), integration-verified, then QA'd end-to-end locally
+  and on the live URL with Playwright + curl: photo→ingredients (Gemini), gut log, history CRUD
+  (inline edit/delete), insights ready + empty states (no fabrication), doctor report
+  (copy/download/print), chatbot query + add/edit/delete (DeepSeek tool-calling), auth gate.
+- Demo/test data has been cleared — the DB is a clean slate for the alpha tester.
 
 ## Next concrete action
 
-1. Confirm all contract-assigned files exist and match the exact interfaces in `CONTRACT.md`
-   (export names, function signatures, route paths, JSON field names, `db.T` schema-qualification).
-2. Orchestrator: `npm install` (express, @neondatabase/serverless, dotenv) and create a `.env`
-   from `.env.example` with a real `DATABASE_URL` and `OPENROUTER_API_KEY`.
-3. `node server.js` → verify `/healthz` returns `{ ok, version, codename, db:'up' }` and that
-   `migrate()` created the `unglutened` schema + tables + indexes.
-4. Run the **qa-protocol** five-phase pass feature-by-feature: photo log → ingredient/irritant
-   extraction, manual log, gut log (Bristol labels), unified history with row-level Edit/Delete,
-   insights empty-state vs ready-state (no fabricated numbers), doctor report copy/download/print,
-   chatbot Q&A + add/edit/delete tool calls, optional password gate, PWA install/offline shell.
-5. Only after local QA passes: deploy to Render (Track 2, free tier, region frankfurt), set env
-   vars in the dashboard, re-run key flows on the live URL, then hand to Diogo for final sign-off.
+- **Hand to Diogo (alpha tester):** open the live URL, install as PWA, log meals + daily gut
+  check-ins for a few days, then check Insights + generate the doctor report.
+- Insights needs **≥4 gut-log days** and an item eaten on ≥3 days (with both exposed/non-exposed
+  days) before it shows correlations; until then it shows an honest empty state.
+- Possible follow-ups (not blocking): keep-warm ping to avoid free-tier cold starts; richer
+  per-ingredient confidence display; CSV/email export of the doctor report.
 
 ## Open questions / watch-list
 
