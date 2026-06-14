@@ -13,10 +13,10 @@ const router = express.Router();
 // Pull meals + symptoms over a generous range so correlation has data to work
 // with. We don't filter by date here (the engine aligns by calendar date),
 // just cap volume with generous limits.
-async function loadData() {
+async function loadData(userId) {
   const [meals, symptoms] = await Promise.all([
-    store.listMeals({ limit: 5000 }),
-    store.listSymptoms({ limit: 2000 }),
+    store.listMeals(userId, { limit: 5000 }),
+    store.listSymptoms(userId, { limit: 2000 }),
   ]);
   return { meals, symptoms };
 }
@@ -25,7 +25,7 @@ async function loadData() {
 router.get("/correlations", async (req, res) => {
   try {
     const { window, minOccur } = req.query;
-    const { meals, symptoms } = await loadData();
+    const { meals, symptoms } = await loadData(req.userId);
 
     const result = correlate.computeCorrelations({
       meals,
@@ -45,7 +45,7 @@ router.get("/correlations", async (req, res) => {
 router.get("/report", async (req, res) => {
   try {
     const { window, minOccur, format } = req.query;
-    const { meals, symptoms } = await loadData();
+    const { meals, symptoms } = await loadData(req.userId);
 
     const correlations = correlate.computeCorrelations({
       meals,

@@ -20,7 +20,7 @@ function parseId(req, res) {
 router.get("/", async (req, res) => {
   try {
     const { from, to, limit } = req.query;
-    const symptoms = await store.listSymptoms({
+    const symptoms = await store.listSymptoms(req.userId, {
       from: from || undefined,
       to: to || undefined,
       limit: limit !== undefined ? parseInt(limit, 10) : undefined,
@@ -36,7 +36,7 @@ router.get("/:id", async (req, res) => {
   const id = parseId(req, res);
   if (id === null) return;
   try {
-    const symptom = await store.getSymptom(id);
+    const symptom = await store.getSymptom(req.userId, id);
     if (!symptom) return res.status(404).json({ error: "not found" });
     res.json({ symptom });
   } catch (err) {
@@ -48,7 +48,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const body = req.body || {};
-    const symptom = await store.createSymptom({
+    const symptom = await store.createSymptom(req.userId, {
       logged_for: body.logged_for !== undefined ? body.logged_for : undefined,
       bloating: body.bloating !== undefined ? body.bloating : undefined,
       bristol: body.bristol !== undefined ? body.bristol : undefined,
@@ -90,7 +90,7 @@ router.put("/:id", async (req, res) => {
     for (const k of allowed) {
       if (Object.prototype.hasOwnProperty.call(body, k)) fields[k] = body[k];
     }
-    const symptom = await store.updateSymptom(id, fields);
+    const symptom = await store.updateSymptom(req.userId, id, fields);
     if (!symptom) return res.status(404).json({ error: "not found" });
     res.json({ symptom });
   } catch (err) {
@@ -103,7 +103,7 @@ router.delete("/:id", async (req, res) => {
   const id = parseId(req, res);
   if (id === null) return;
   try {
-    const ok = await store.deleteSymptom(id);
+    const ok = await store.deleteSymptom(req.userId, id);
     if (!ok) return res.status(404).json({ error: "not found" });
     res.json({ ok: true });
   } catch (err) {

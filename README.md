@@ -40,7 +40,8 @@ just talking to it.
   meal"). The chatbot calls real tools against your data and never invents entries.
 - **Installable PWA** — web app manifest, service worker (cached app shell, network-first for
   `/api`), works offline for the shell, and installs to your home screen like a native app.
-- **Optional password gate** — set `APP_PASSWORD` to require login; leave it unset to run open.
+- **Accounts** — sign up with email + password; each account's meals, gut logs, and chat history
+  are private to that user. Passwords are scrypt-hashed; sessions use a signed `ug_session` cookie.
 
 ---
 
@@ -79,8 +80,7 @@ its tables cleanly isolated in their own schema.
 | `OPENROUTER_API_KEY` | OpenRouter bearer token | — (**required for AI**) |
 | `OPENROUTER_VISION_MODEL` | photo → ingredients model (cheap, vision) | `google/gemini-2.5-flash-lite` |
 | `OPENROUTER_CHAT_MODEL` | chatbot reasoning + tool-calling model | `deepseek/deepseek-v4-flash` |
-| `APP_PASSWORD` | if set, login is required | unset = open |
-| `SESSION_SECRET` | signs the auth cookie | derived fallback |
+| `SESSION_SECRET` | signs the `ug_session` auth cookie — **set a strong value in production** | derived fallback |
 | `PUBLIC_URL` | sent as OpenRouter `HTTP-Referer` | `http://localhost` |
 
 Copy `.env.example` to `.env` and fill in the required values for local development. The app
@@ -113,8 +113,9 @@ you can diagnose a bad `DATABASE_URL` from the health endpoint.
 
 **Health check:** `GET /healthz` → `{ ok, version, codename, db: 'up' | 'down' }`.
 
-If `APP_PASSWORD` is set you'll see a login overlay; otherwise the app is open. The current app
-version string is shown unobtrusively in the UI and comes from `/healthz`.
+On first visit you'll see a **sign-up / log-in** screen — create an account with your email and a
+password (≥6 chars). Your data is private to your account. The current app version string is shown
+in Settings and comes from `/healthz`.
 
 ---
 
@@ -135,8 +136,8 @@ UnGlutened ships with a `render.yaml` blueprint (track 2 — personal apps on Re
    - `OPENROUTER_VISION_MODEL`, `OPENROUTER_CHAT_MODEL` — optional overrides (sensible defaults
      are baked in).
    - `DB_SCHEMA` — leave as `unglutened` unless you're sharing the DB and want a different schema.
-   - `APP_PASSWORD` — set to require login (recommended for a deployed instance).
-   - `SESSION_SECRET` — a long random string to sign the session cookie.
+   - **`SESSION_SECRET`** — a long random string that signs session cookies. **Set a strong value**
+     (if unset, the fallback would let anyone forge a session for any account).
    - `PUBLIC_URL` — your Render URL (used as the OpenRouter `HTTP-Referer`).
 4. Deploy. Render builds, starts `node server.js`, and waits for `/healthz` to go green.
 

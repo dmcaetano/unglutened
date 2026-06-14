@@ -5,7 +5,39 @@ Newest entries at the top.
 
 ---
 
-## 2026-06-14 — Built, QA'd, and shipped to production (v1.0.1 → v1.0.2 "Iron Man")
+## 2026-06-14 — Multi-user accounts (v1.1.0 "Batman")
+
+**What we did**
+
+- Replaced the single shared `APP_PASSWORD` passcode with real **email + password sign-up/login**
+  (Diogo's request — "a sign-up menu with email and password… data saved just for them").
+- Built via a workflow (3 builders against `AUTH_V2.md` + 2 verifiers incl. a security audit):
+  - `users` table (scrypt `password_hash`); `user_id` added to `meals`/`symptoms`/`chat_messages`
+    with per-table indexes (idempotent migrate).
+  - `lib/auth.js` rewritten: scrypt hash/verify, user-scoped HMAC `ug_session` token, always-on
+    `requireAuth` that sets `req.userId`.
+  - `lib/store.js`: every data fn takes `userId` first and scopes every query by `user_id`; added
+    `createUser`/`getUserByEmail`/`getUserById`. Routes + chatAgent thread `req.userId` everywhere.
+  - Frontend: passcode overlay → Log in / Sign up card (email+password, mode toggle, errors);
+    Settings shows the account email; cold-start "waking" retry preserved.
+- **Security verified** (both verifier agents: "no unscoped queries") and proven by live test:
+  account B sees 0 of account A's meals; B's GET/DELETE of A's meal → 404; A's data untouched.
+  Auth error cases: duplicate email 409, wrong password 401, short password 400, correct login 200.
+- QA'd the UI (Playwright): login screen, signup toggle, account creation, account email in Settings.
+
+**What was decided**
+
+- Auth is now always-on (no optional shared-password mode). Sessions = HMAC-signed cookie encoding
+  the user id. `APP_PASSWORD` retired; `SESSION_SECRET` stays set on Render.
+
+**What didn't work / open items**
+
+- `user_id` left nullable (no FK/NOT NULL) — acceptable: clean DB, `requireAuth` guarantees the id,
+  every INSERT sets it. Could harden later with NOT NULL + FK.
+
+---
+
+## 2026-06-14 — Built, QA'd, and shipped to production (v1.0.1 → v1.0.3 "Iron Man")
 
 **What we did**
 

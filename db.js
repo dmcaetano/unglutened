@@ -19,6 +19,7 @@ const SCHEMA = process.env.DB_SCHEMA || 'unglutened';
 
 // Schema-qualified table identifiers. Use these everywhere.
 const T = {
+  users: `${SCHEMA}.users`,
   meals: `${SCHEMA}.meals`,
   symptoms: `${SCHEMA}.symptoms`,
   chat: `${SCHEMA}.chat_messages`,
@@ -43,6 +44,16 @@ async function q(text, params = []) {
  */
 async function migrate() {
   await q(`CREATE SCHEMA IF NOT EXISTS ${SCHEMA}`);
+
+  // Users table — created BEFORE the ALTERs that add user_id to the data tables.
+  await q(`
+    CREATE TABLE IF NOT EXISTS ${T.users} (
+      id BIGSERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `);
 
   await q(`
     CREATE TABLE IF NOT EXISTS ${T.meals} (
@@ -90,6 +101,16 @@ async function migrate() {
 
   await q(`CREATE INDEX IF NOT EXISTS meals_eaten_at_idx ON ${T.meals} (eaten_at DESC)`);
   await q(`CREATE INDEX IF NOT EXISTS symptoms_logged_for_idx ON ${T.symptoms} (logged_for DESC)`);
+
+  // Multi-user: add a user_id scope column to each data table (the deployed
+  // tables already exist without it) and index it for per-user lookups.
+  await q(`ALTER TABLE ${T.meals} ADD COLUMN IF NOT EXISTS user_id BIGINT`);
+  await q(`ALTER TABLE ${T.symptoms} ADD COLUMN IF NOT EXISTS user_id BIGINT`);
+  await q(`ALTER TABLE ${T.chat} ADD COLUMN IF NOT EXISTS user_id BIGINT`);
+
+  await q(`CREATE INDEX IF NOT EXISTS meals_user_idx ON ${T.meals} (user_id)`);
+  await q(`CREATE INDEX IF NOT EXISTS symptoms_user_idx ON ${T.symptoms} (user_id)`);
+  await q(`CREATE INDEX IF NOT EXISTS chat_messages_user_idx ON ${T.chat} (user_id)`);
 }
 
 /**

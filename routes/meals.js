@@ -22,7 +22,7 @@ function parseId(req, res) {
 router.get("/", async (req, res) => {
   try {
     const { from, to, limit, contains } = req.query;
-    const meals = await store.listMeals({
+    const meals = await store.listMeals(req.userId, {
       from: from || undefined,
       to: to || undefined,
       limit: limit !== undefined ? parseInt(limit, 10) : undefined,
@@ -39,7 +39,7 @@ router.get("/:id", async (req, res) => {
   const id = parseId(req, res);
   if (id === null) return;
   try {
-    const meal = await store.getMeal(id);
+    const meal = await store.getMeal(req.userId, id);
     if (!meal) return res.status(404).json({ error: "not found" });
     res.json({ meal });
   } catch (err) {
@@ -62,7 +62,7 @@ router.post("/", async (req, res) => {
         description,
       });
 
-      const meal = await store.createMeal({
+      const meal = await store.createMeal(req.userId, {
         eaten_at: eaten_at || undefined,
         title: ai.title || title || "Meal",
         description: description !== undefined ? description : null,
@@ -77,7 +77,7 @@ router.post("/", async (req, res) => {
     }
 
     // Manual create (no photo).
-    const meal = await store.createMeal({
+    const meal = await store.createMeal(req.userId, {
       eaten_at: eaten_at || undefined,
       title: title !== undefined ? title : null,
       description: description !== undefined ? description : null,
@@ -118,7 +118,7 @@ router.put("/:id", async (req, res) => {
     for (const k of allowed) {
       if (Object.prototype.hasOwnProperty.call(body, k)) fields[k] = body[k];
     }
-    const meal = await store.updateMeal(id, fields);
+    const meal = await store.updateMeal(req.userId, id, fields);
     if (!meal) return res.status(404).json({ error: "not found" });
     res.json({ meal });
   } catch (err) {
@@ -131,7 +131,7 @@ router.post("/:id/reanalyze", async (req, res) => {
   const id = parseId(req, res);
   if (id === null) return;
   try {
-    const existing = await store.getMeal(id);
+    const existing = await store.getMeal(req.userId, id);
     if (!existing) return res.status(404).json({ error: "not found" });
     if (!existing.thumb) {
       return res
@@ -145,7 +145,7 @@ router.post("/:id/reanalyze", async (req, res) => {
       description: existing.description,
     });
 
-    const meal = await store.updateMeal(id, {
+    const meal = await store.updateMeal(req.userId, id, {
       title: ai.title || existing.title || "Meal",
       ingredients: Array.isArray(ai.ingredients) ? ai.ingredients : [],
       irritant_flags: Array.isArray(ai.irritant_flags) ? ai.irritant_flags : [],
@@ -165,7 +165,7 @@ router.delete("/:id", async (req, res) => {
   const id = parseId(req, res);
   if (id === null) return;
   try {
-    const ok = await store.deleteMeal(id);
+    const ok = await store.deleteMeal(req.userId, id);
     if (!ok) return res.status(404).json({ error: "not found" });
     res.json({ ok: true });
   } catch (err) {

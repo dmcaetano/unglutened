@@ -135,8 +135,9 @@
   // State
   // ---------------------------------------------------------------------------
   const state = {
-    authRequired: false,
-    authed: true,
+    authed: false,
+    user: null,
+    authMode: 'login', // 'login' | 'signup'
     version: '',
     db: 'unknown',
     correlationWindow: 1,
@@ -172,12 +173,35 @@
   // ===========================================================================
   // AUTH
   // ===========================================================================
+  // Reflect the current auth mode (login vs signup) in the overlay copy: the
+  // intro line, submit button label, and the toggle prompt/link text.
+  function applyAuthMode() {
+    const signup = state.authMode === 'signup';
+    const intro = $('#authIntro');
+    const submit = $('#authSubmit');
+    const prompt = $('#authTogglePrompt');
+    const link = $('#authToggleLink');
+    const pwInput = $('#loginPw');
+    if (intro) intro.textContent = signup ? 'Create your account to get started.' : 'Log in to continue.';
+    if (submit) submit.textContent = signup ? 'Sign up' : 'Log in';
+    if (prompt) prompt.textContent = signup ? 'Already have an account?' : 'New here?';
+    if (link) link.textContent = signup ? 'Log in' : 'Create an account';
+    if (pwInput) pwInput.setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
+  }
+  function setAuthMode(mode) {
+    state.authMode = mode === 'signup' ? 'signup' : 'login';
+    if ($('#loginErr')) $('#loginErr').textContent = '';
+    applyAuthMode();
+  }
+
   function showLogin() {
     state.authed = false;
     const ov = $('#loginOverlay');
     ov.classList.remove('hidden');
     ov.setAttribute('aria-hidden', 'false');
-    setTimeout(() => { const i = $('#loginPw'); if (i) i.focus(); }, 50);
+    setLoginWaking(false);
+    applyAuthMode();
+    setTimeout(() => { const i = $('#loginEmail'); if (i) i.focus(); }, 50);
   }
   function hideLogin() {
     state.authed = true;
@@ -185,27 +209,36 @@
     ov.classList.add('hidden');
     ov.setAttribute('aria-hidden', 'true');
   }
-  // Show/clear a "waking up" state on the login overlay. The host (Render free
+  // Show/clear a "waking up" state on the auth overlay. The host (Render free
   // tier) spins the server down when idle; the first request then takes ~30-60s
   // to wake and may briefly 404. Rather than fall through to a broken-looking
-  // empty app, we surface a friendly waking message and retry.
+  // empty app, we surface a friendly waking message and hide the form, retrying.
   function setLoginWaking(on, failed) {
     const ov = $('#loginOverlay');
-    const sub = $('#loginForm p');
-    const pw = $('#loginPw').closest('.field');
-    const btn = $('#loginForm button[type="submit"]');
+    const sub = $('#authIntro');
+    const emailField = $('#loginEmail').closest('.field');
+    const pwField = $('#loginPw').closest('.field');
+    const btn = $('#authSubmit');
+    const toggle = $('.auth-toggle');
+    const setFormHidden = (hidden) => {
+      const d = hidden ? 'none' : '';
+      if (emailField) emailField.style.display = d;
+      if (pwField) pwField.style.display = d;
+      if (btn) btn.style.display = hidden ? 'none' : '';
+      if (toggle) toggle.style.display = hidden ? 'none' : '';
+    };
     if (on) {
       ov.classList.remove('hidden');
       ov.setAttribute('aria-hidden', 'false');
       if (sub) sub.textContent = 'Waking up the server… the first load can take up to a minute.';
-      if (pw) pw.style.display = 'none';
-      if (btn) btn.style.display = 'none';
+      setFormHidden(true);
+    } else if (failed) {
+      if (sub) sub.textContent = 'Couldn’t reach the server. Please refresh in a moment.';
+      setFormHidden(true);
     } else {
-      if (sub) sub.textContent = failed
-        ? 'Couldn’t reach the server. Please refresh in a moment.'
-        : 'Enter your passcode to continue.';
-      if (pw) pw.style.display = '';
-      if (btn) btn.style.display = failed ? 'none' : '';
+      // Restore the normal form; the mode-specific copy is set by applyAuthMode().
+      setFormHidden(false);
+      applyAuthMode();
     }
   }
 
@@ -215,12 +248,11 @@
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         const s = await api('/api/auth/status');
-        state.authRequired = !!s.authRequired;
         state.authed = !!s.authed;
+        state.user = s.user || null;
         setLoginWaking(false);
-        if (state.authRequired && !state.authed) showLogin();
-        else hideLogin();
-        $('#logoutBtn').style.display = state.authRequired ? '' : 'none';
+        if (state.authed) hideLogin();
+        else showLogin();
         return true;
       } catch (e) {
         // Server likely cold-starting. Show the waking state and retry.
@@ -236,23 +268,44 @@
     return false;
   }
   function initAuthForm() {
+    $('#authToggleLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthMode(state.authMode === 'signup' ? 'login' : 'signup');
+      const i = $('#loginEmail'); if (i) i.focus();
+    });
+
     $('#loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const email = $('#loginEmail').value.trim();
       const pw = $('#loginPw').value;
-      $('#loginErr').textContent = '';
+      const errEl = $('#loginErr');
+      errEl.textContent = '';
+      if (!email) { errEl.textContent = 'Please enter your email.'; return; }
+      if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+
+      const signup = state.authMode === 'signup';
+      const path = signup ? '/api/auth/signup' : '/api/auth/login';
+      const btn = $('#authSubmit');
+      btn.disabled = true;
       try {
-        await api('/api/auth/login', { method: 'POST', body: { password: pw } });
+        const res = await api(path, { method: 'POST', body: { email: email, password: pw } });
+        state.user = (res && res.user) || null;
         $('#loginPw').value = '';
         hideLogin();
         await bootData();
-        toast('Welcome back', 'ok');
+        toast(signup ? 'Welcome to UnGlutened' : 'Welcome back', 'ok');
       } catch (err) {
-        $('#loginErr').textContent = 'That passcode didn’t work. Try again.';
+        // Surface the server-provided message (400/401/409); fall back to generic.
+        errEl.textContent = err && err.message ? err.message : 'Something went wrong. Try again.';
       }
+      btn.disabled = false;
     });
+
     $('#logoutBtn').addEventListener('click', async () => {
       try { await api('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+      state.user = null;
       closeSettings();
+      setAuthMode('login');
       showLogin();
     });
   }
@@ -961,6 +1014,8 @@
   function closeSettings() { $('#settingsBackdrop').classList.remove('open'); $('#settingsSheet').classList.remove('open'); }
 
   async function refreshSettingsStats() {
+    const emailEl = $('#setEmail');
+    if (emailEl) emailEl.textContent = (state.user && state.user.email) ? state.user.email : '—';
     try {
       const [mres, sres] = await Promise.all([api('/api/meals?limit=1'), api('/api/symptoms')]);
       // meals route only returns a page; for an accurate-ish count use lengths where available.
@@ -1044,7 +1099,7 @@
 
     const reachable = await checkAuth();
     if (!reachable) return; // server unreachable; waking/refresh message already shown
-    if (!(state.authRequired && !state.authed)) {
+    if (state.authed) {
       await bootData();
     } else {
       // still load health so version shows even pre-login

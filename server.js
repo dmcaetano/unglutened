@@ -7,7 +7,7 @@
  *   - load .env
  *   - express app, JSON body up to 20mb, static public/
  *   - GET /healthz (version + db status)
- *   - mount /api/auth (PUBLIC), then requireAuth gate, then the protected API
+ *   - mount /api/auth (PUBLIC), then the always-on requireAuth gate, then the protected API
  *   - run migrate() (log result; listen regardless so /healthz can report db:'down')
  */
 
@@ -62,7 +62,8 @@ app.get('/healthz', async (req, res) => {
 // Public auth routes (login/logout/status) — BEFORE the auth gate.
 app.use('/api/auth', authRoutes);
 
-// Everything under /api below this point requires auth (when APP_PASSWORD set).
+// Everything under /api below this point requires a valid session (always on).
+// requireAuth verifies the ug_session cookie and sets req.userId.
 app.use('/api', requireAuth);
 
 // Protected API.

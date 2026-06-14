@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
     }
     const history = Array.isArray(body.history) ? body.history : [];
 
-    const result = await chatAgent.runChat({ message: String(message), history });
+    const result = await chatAgent.runChat({ userId: req.userId, message: String(message), history });
     return res.json({
       reply: result.reply,
       actions: result.actions,
@@ -42,7 +42,7 @@ router.get('/history', async (req, res) => {
   try {
     let limit = parseInt(req.query.limit, 10);
     if (!Number.isFinite(limit) || limit <= 0) limit = 50;
-    const history = await store.getChatHistory(limit);
+    const history = await store.getChatHistory(req.userId, limit);
     return res.json({ history });
   } catch (err) {
     return res
@@ -54,7 +54,7 @@ router.get('/history', async (req, res) => {
 // DELETE /api/chat/history — clear persisted chat history.
 router.delete('/history', async (req, res) => {
   try {
-    await store.clearChat();
+    await store.clearChat(req.userId);
     return res.json({ ok: true });
   } catch (err) {
     return res

@@ -12,9 +12,9 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Where I am
 
-- **Phase:** ✅ Shipped to production — **v1.0.3 "Iron Man"**, live and QA-verified.
-- **Live URL:** https://unglutened.onrender.com  · **Passcode:** set via `APP_PASSWORD` env var
-  (shared with the tester out-of-band — never commit it; the repo is public).
+- **Phase:** ✅ Shipped to production — **v1.1.0 "Batman"** (multi-user accounts), live + QA-verified.
+- **Live URL:** https://unglutened.onrender.com — **sign up with your own email + password**;
+  each account's meals/gut logs/chat are private to it. (The old shared `APP_PASSWORD` gate is gone.)
 - **GitHub:** https://github.com/dmcaetano/unglutened (public) · **Render:** srv-d8nckgpo3t8c73cm6j40
 - All contract files built (5 parallel agents), integration-verified, then QA'd end-to-end locally
   and on the live URL with Playwright + curl: photo→ingredients (Gemini), gut log, history CRUD
@@ -47,6 +47,12 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 
 ## Decisions made
 
+- **2026-06-14** — **Multi-user accounts (v1.1.0 "Batman"):** replaced the single shared
+  `APP_PASSWORD` gate with real email+password sign-up/login. New `users` table (scrypt password
+  hashes); `meals`/`symptoms`/`chat_messages` got a `user_id` column; **every data query is scoped
+  by `user_id`** so accounts are fully isolated (verified: account B sees none of A's data, and
+  GET/DELETE of A's rows by B returns 404). Session = HMAC-signed `ug_session` cookie encoding the
+  user id (30-day). `APP_PASSWORD` is now unused. `SESSION_SECRET` must stay set on Render (it is).
 - **2026-06-14** — Project kicked off as a real project (own folder with STATE.md + LOG.md) under
   `D:\Dropbox\Projects\2026 Claude\UnGlutened`, not an INBOX one-liner.
 - **2026-06-14** — Runtime: **Node.js 24, CommonJS**, no TypeScript, no ESM, no build step. Use

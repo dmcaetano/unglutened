@@ -17,18 +17,26 @@
 </head>
 <body>
 
-  <!-- ===================== LOGIN OVERLAY ===================== -->
+  <!-- ===================== AUTH OVERLAY ===================== -->
   <div id="loginOverlay" class="overlay hidden" aria-hidden="true">
     <form id="loginForm" class="login-card" novalidate>
       <img src="/icon.svg" alt="UnGlutened" />
       <h1>UnGlutened</h1>
-      <p>Enter your passcode to continue.</p>
+      <p id="authIntro">Log in to continue.</p>
       <div class="field" style="text-align:left;margin-bottom:8px">
-        <label for="loginPw">Passcode</label>
-        <input id="loginPw" type="password" autocomplete="current-password" inputmode="text" placeholder="••••••••" />
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com" />
       </div>
-      <button class="btn block" type="submit">Unlock</button>
+      <div class="field" style="text-align:left;margin-bottom:8px">
+        <label for="loginPw">Password</label>
+        <input id="loginPw" type="password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters" />
+      </div>
+      <button id="authSubmit" class="btn block" type="submit">Log in</button>
       <div id="loginErr" class="err" role="alert"></div>
+      <p class="auth-toggle" style="margin-top:14px;font-size:14px">
+        <span id="authTogglePrompt">New here?</span>
+        <a href="#" id="authToggleLink" role="button">Create an account</a>
+      </p>
     </form>
   </div>
 
@@ -212,13 +220,14 @@
   <div class="sheet" id="settingsSheet" role="dialog" aria-modal="true" aria-label="Settings">
     <div class="handle" aria-hidden="true"></div>
     <h2>Settings</h2>
+    <div class="row"><span class="k">Account</span><span class="v" id="setEmail">—</span></div>
     <div class="row"><span class="k">App version</span><span class="v" id="setVersion">—</span></div>
     <div class="row"><span class="k">Database</span><span class="v" id="setDb">—</span></div>
     <div class="row"><span class="k">Meals logged</span><span class="v" id="setMeals">—</span></div>
     <div class="row"><span class="k">Gut check-ins</span><span class="v" id="setSymptoms">—</span></div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn ghost" type="button" id="clearChatBtn">Clear chat history</button>
-      <button class="btn ghost" type="button" id="logoutBtn" style="display:none">Log out</button>
+      <button class="btn ghost" type="button" id="logoutBtn">Log out</button>
     </div>
     <button class="btn block secondary" type="button" id="closeSettings" style="margin-top:12px">Close</button>
     <p class="footer-note">Self-tracking tool, not medical advice.</p>
