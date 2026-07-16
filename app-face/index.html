@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#FAF7F2">
+  <meta name="color-scheme" content="light">
+  <title>UnGlutened</title>
+  <link rel="stylesheet" href="./face.css">
+</head>
+<body>
+  <section class="auth-view" id="authView" aria-labelledby="authTitle">
+    <div class="auth-hero">
+      <img class="auth-logo" src="./logo.png" alt="UnGlutened logo" width="72" height="72">
+      <h1 class="wordmark" id="authTitle">Un<span>Glutened</span></h1>
+      <p>Photograph your meals. Understand your gut.</p>
+    </div>
+
+    <form class="auth-card" id="authForm">
+      <div class="auth-copy">
+        <p class="eyebrow" id="authEyebrow">Welcome back</p>
+        <h2 id="authHeading">Good to see you</h2>
+        <p id="authDescription">Log in to keep building your gut-health picture.</p>
+      </div>
+
+      <div class="form-field" id="nameField" hidden>
+        <label for="authName">Name</label>
+        <input id="authName" name="name" type="text" autocomplete="name" placeholder="Your name">
+      </div>
+
+      <div class="form-field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-field">
+        <label for="authPassword">Password</label>
+        <input id="authPassword" name="password" type="password" autocomplete="current-password" placeholder="At least 8 characters" minlength="8" required>
+      </div>
+
+      <button class="button button-primary button-block" id="authSubmit" type="submit">Log in</button>
+      <button class="text-button auth-toggle" id="authToggle" type="button">New here? Create an account</button>
+      <p class="auth-fine-print">Design preview — any details you enter stay on this device.</p>
+    </form>
+  </section>
+
+  <div class="app-view" id="appView" hidden>
+    <header class="app-header">
+      <a class="header-brand" href="#log" data-tab-link="log" aria-label="UnGlutened home">
+        <img src="./logo.png" alt="" width="28" height="28">
+        <span>Un<strong>Glutened</strong></span>
+      </a>
+      <p class="header-context" id="headerContext">Log a meal</p>
+      <button class="avatar-button" type="button" aria-label="Open profile">DC</button>
+    </header>
+
+    <main class="app-main">
+      <section class="screen" id="screen-log" data-screen="log" role="tabpanel" aria-labelledby="tab-log">
+        <div class="screen-intro">
+          <p class="eyebrow">Meal log</p>
+          <h1>What are we eating?</h1>
+          <p>A quick photo is enough. You can correct anything before saving.</p>
+        </div>
+
+        <button class="capture-card" id="captureCard" type="button" aria-describedby="captureHint">
+          <span class="capture-state capture-idle">
+            <span class="camera-bubble" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7.5h3l1.4-2h7.2l1.4 2h3a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2Z"></path>
+                <circle cx="12" cy="14" r="4"></circle>
+              </svg>
+            </span>
+            <strong>Snap your meal</strong>
+            <span id="captureHint">or choose from gallery</span>
+          </span>
+
+          <span class="capture-state capture-loading" aria-live="polite">
+            <span class="photo-shimmer" aria-hidden="true"></span>
+            <span class="spinner" aria-hidden="true"></span>
+            <strong>Reading ingredients…</strong>
+            <span>Looking for likely gut triggers</span>
+          </span>
+
+          <span class="capture-state capture-ready">
+            <span class="meal-preview" aria-hidden="true">🍽️</span>
+            <span>
+              <strong>Meal photo ready</strong>
+              <small>Tap to analyze again</small>
+            </span>
+            <span class="ready-check" aria-hidden="true">✓</span>
+          </span>
+        </button>
+
+        <div class="or-divider"><span>or describe it</span></div>
+
+        <form class="describe-form" id="describeForm">
+          <label class="sr-only" for="mealDescription">Describe your meal</label>
+          <input id="mealDescription" type="text" placeholder="e.g. salmon, rice and broccoli">
+          <button class="button button-primary" type="submit">Analyze</button>
+        </form>
+
+        <article class="result-card" id="mealResult" aria-labelledby="resultTitle" hidden>
+          <div class="result-hero">
+            <div class="result-icon" aria-hidden="true">🐟</div>
+            <div>
+              <p class="eyebrow">Meal detected</p>
+              <h2 id="resultTitle">Grilled salmon, rice &amp; broccoli</h2>
+            </div>
+          </div>
+
+          <p class="ai-summary">A balanced plate with protein and simple carbs. Three ingredients may matter for your symptoms.</p>
+
+          <div class="section-heading">
+            <div>
+              <h3>Check the ingredients</h3>
+              <p>Tap a label to change whether it counts as an irritant.</p>
+            </div>
+          </div>
+
+          <div class="ingredient-list" id="ingredientList">
+            <div class="ingredient-chip">
+              <span class="ingredient-name"><i class="confidence high"></i><strong>Salmon</strong></span>
+              <button class="irritant-toggle" type="button" role="switch" aria-checked="false" data-category="Other">
+                <span>Safe</span>
+              </button>
+            </div>
+            <div class="ingredient-chip">
+              <span class="ingredient-name"><i class="confidence high"></i><strong>White rice</strong></span>
+              <button class="irritant-toggle" type="button" role="switch" aria-checked="false" data-category="Other">
+                <span>Safe</span>
+              </button>
+            </div>
+            <div class="ingredient-chip is-irritant">
+              <span class="ingredient-name"><i class="confidence high"></i><strong>Broccoli</strong></span>
+              <button class="irritant-toggle" type="button" role="switch" aria-checked="true" data-category="FODMAP">
+                <span>FODMAP</span>
+              </button>
+            </div>
+            <div class="ingredient-chip is-irritant">
+              <span class="ingredient-name"><i class="confidence medium"></i><strong>Butter</strong></span>
+              <button class="irritant-toggle" type="button" role="switch" aria-checked="true" data-category="Dairy">
+                <span>Dairy</span>
+              </button>
+            </div>
+            <div class="ingredient-chip is-irritant">
+              <span class="ingredient-name"><i class="confidence medium"></i><strong>Soy sauce</strong></span>
+              <button class="irritant-toggle" type="button" role="switch" aria-checked="true" data-category="Gluten">
+                <span>Gluten</span>
+              </button>
+            </div>
+            <div class="ingredient-chip">
+              <span class="ingredient-name"><i class="confidence low"></i><strong>Lemon</strong></span>
+              <button class="irritant-toggle" type="button" role="switch" aria-checked="false" data-category="Other">
+                <span>Safe</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="detected-row">
+            <span>Detected</span>
+            <div class="badge-list" id="detectedBadges" aria-live="polite"></div>
+          </div>
+
+          <div class="button-row">
+            <button class="button button-primary button-grow" id="saveMeal" type="button">Save meal</button>
+            <button class="button button-ghost" id="discardMeal" type="button">Discard</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="screen" id="screen-gut" data-screen="gut" role="tabpanel" aria-labelledby="tab-gut" hidden>
+        <div class="screen-intro intro-row">
+          <div>
+            <p class="eyebrow">Daily check-in</p>
+            <h1>How’s your gut today?</h1>
+            <p>A minute now makes your patterns clearer later.</p>
+          </div>
+          <span class="date-pill" id="todayPill">Today</span>
+        </div>
+
+        <form id="gutForm">
+          <fieldset class="checkin-card">
+            <legend>
+              <span>Bloating</span>
+              <small>0 none · 5 severe</small>
+            </legend>
+            <div class="scale-anchors"><span>🙂 None</span><span>😣 Severe</span></div>
+            <div class="choice-group number-scale" data-selector="bloating" role="group" aria-label="Bloating severity">
+              <button type="button" aria-pressed="true">0</button>
+              <button type="button" aria-pressed="false">1</button>
+              <button type="button" aria-pressed="false">2</button>
+              <button type="button" aria-pressed="false">3</button>
+              <button type="button" aria-pressed="false">4</button>
+              <button type="button" aria-pressed="false">5</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="checkin-card">
+            <legend class="legend-with-action">
+              <span>
+                <span>Bristol scale</span>
+                <small>What did it look like?</small>
+              </span>
+              <button class="text-button tiny-link" id="bristolInfoButton" type="button">What’s this?</button>
+            </legend>
+            <div class="choice-group bristol-scale" data-selector="bristol" role="group" aria-label="Bristol stool scale">
+              <button type="button" aria-pressed="false"><strong>1</strong><span>Hard lumps</span></button>
+              <button type="button" aria-pressed="false"><strong>2</strong><span>Lumpy</span></button>
+              <button type="button" aria-pressed="false"><strong>3</strong><span>Cracked</span></button>
+              <button type="button" aria-pressed="true"><strong>4</strong><span>Ideal</span></button>
+              <button type="button" aria-pressed="false"><strong>5</strong><span>Soft blobs</span></button>
+              <button type="button" aria-pressed="false"><strong>6</strong><span>Mushy</span></button>
+              <button type="button" aria-pressed="false"><strong>7</strong><span>Liquid</span></button>
+            </div>
+          </fieldset>
+
+          <div class="checkin-grid">
+            <fieldset class="checkin-card compact-card">
+              <legend><span>Gas</span><small>0–5</small></legend>
+              <div class="choice-group number-scale" data-selector="gas" role="group" aria-label="Gas severity">
+                <button type="button" aria-pressed="true">0</button>
+                <button type="button" aria-pressed="false">1</button>
+                <button type="button" aria-pressed="false">2</button>
+                <button type="button" aria-pressed="false">3</button>
+                <button type="button" aria-pressed="false">4</button>
+                <button type="button" aria-pressed="false">5</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="checkin-card compact-card">
+              <legend><span>Cramps</span><small>0–5</small></legend>
+              <div class="choice-group number-scale" data-selector="cramps" role="group" aria-label="Cramp severity">
+                <button type="button" aria-pressed="true">0</button>
+                <button type="button" aria-pressed="false">1</button>
+                <button type="button" aria-pressed="false">2</button>
+                <button type="button" aria-pressed="false">3</button>
+                <button type="button" aria-pressed="false">4</button>
+                <button type="button" aria-pressed="false">5</button>
+              </div>
+            </fieldset>
+          </div>
+
+          <fieldset class="checkin-card">
+            <legend><span>Energy</span><small>How charged do you feel?</small></legend>
+            <div class="choice-group emoji-scale" data-selector="energy" role="group" aria-label="Energy level">
+              <button type="button" aria-label="Very low energy" aria-pressed="false">🪫</button>
+              <button type="button" aria-label="Low energy" aria-pressed="false">🥱</button>
+              <button type="button" aria-label="Okay energy" aria-pressed="true">🙂</button>
+              <button type="button" aria-label="Good energy" aria-pressed="false">😊</button>
+              <button type="button" aria-label="Great energy" aria-pressed="false">⚡</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="checkin-card">
+            <legend><span>Mood</span><small>No wrong answer</small></legend>
+            <div class="choice-group emoji-scale" data-selector="mood" role="group" aria-label="Mood">
+              <button type="button" aria-label="Very low mood" aria-pressed="false">😞</button>
+              <button type="button" aria-label="Low mood" aria-pressed="false">😕</button>
+              <button type="button" aria-label="Neutral mood" aria-pressed="false">😐</button>
+              <button type="button" aria-label="Good mood" aria-pressed="true">🙂</button>
+              <button type="button" aria-label="Great mood" aria-pressed="false">😄</button>
+            </div>
+          </fieldset>
+
+          <div class="form-field note-field">
+            <label for="gutNote">Anything else? <span>Optional</span></label>
+            <textarea id="gutNote" rows="4" placeholder="Stressful day, ate late, slept badly…"></textarea>
+          </div>
+
+          <button class="button button-primary button-block" type="submit">Save check-in</button>
+        </form>
+      </section>
+
+      <section class="screen" id="screen-history" data-screen="history" role="tabpanel" aria-labelledby="tab-history" hidden>
+        <div class="screen-intro">
+          <p class="eyebrow">Your timeline</p>
+          <h1>History</h1>
+          <p>Meals and symptoms, together in one calm view.</p>
+        </div>
+
+        <div class="filter-chips" id="historyFilters" role="group" aria-label="Filter history">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="meal" aria-pressed="false">Meals</button>
+          <button type="button" data-filter="gut" aria-pressed="false">Gut</button>
+        </div>
+
+        <div id="historyTimeline">
+          <section class="day-group">
+            <h2>Today</h2>
+
+            <article class="timeline-item" data-kind="meal">
+              <div class="food-thumb salmon" aria-hidden="true">🐟</div>
+              <div class="timeline-copy">
+                <h3>Salmon, rice &amp; broccoli</h3>
+                <p>12:42 · Lunch</p>
+                <div class="mini-badges"><span>Gluten</span><span>Dairy</span><span>FODMAP</span></div>
+              </div>
+              <button class="row-menu" type="button" aria-label="Actions for Salmon, rice and broccoli" data-title="Salmon, rice &amp; broccoli">⋯</button>
+            </article>
+
+            <article class="timeline-item gut-item" data-kind="gut">
+              <div class="gut-thumb" aria-hidden="true">🙂</div>
+              <div class="timeline-copy">
+                <h3>Daily gut check-in</h3>
+                <p>Bloating 1 · Bristol 4 · Good mood</p>
+                <div class="mini-badges protective"><span>Feeling steady</span></div>
+              </div>
+              <button class="row-menu" type="button" aria-label="Actions for today’s gut check-in" data-title="Today’s gut check-in">⋯</button>
+            </article>
+          </section>
+
+          <section class="day-group">
+            <h2>Yesterday</h2>
+
+            <article class="timeline-item" data-kind="meal">
+              <div class="food-thumb toast" aria-hidden="true">🍞</div>
+              <div class="timeline-copy">
+                <h3>Toast with butter</h3>
+                <p>08:16 · Breakfast</p>
+                <div class="mini-badges"><span>Gluten</span><span>Dairy</span></div>
+              </div>
+              <button class="row-menu" type="button" aria-label="Actions for Toast with butter" data-title="Toast with butter">⋯</button>
+            </article>
+
+            <article class="timeline-item" data-kind="meal">
+              <div class="food-thumb coffee" aria-hidden="true">☕</div>
+              <div class="timeline-copy">
+                <h3>Oat latte</h3>
+                <p>10:05 · Drink</p>
+                <div class="mini-badges"><span>Coffee</span></div>
+              </div>
+              <button class="row-menu" type="button" aria-label="Actions for Oat latte" data-title="Oat latte">⋯</button>
+            </article>
+
+            <article class="timeline-item gut-item" data-kind="gut">
+              <div class="gut-thumb amber" aria-hidden="true">😕</div>
+              <div class="timeline-copy">
+                <h3>Daily gut check-in</h3>
+                <p>Bloating 3 · Bristol 6 · Low energy</p>
+                <div class="mini-badges warning"><span>Symptoms elevated</span></div>
+              </div>
+              <button class="row-menu" type="button" aria-label="Actions for yesterday’s gut check-in" data-title="Yesterday’s gut check-in">⋯</button>
+            </article>
+          </section>
+
+          <section class="day-group">
+            <h2>Mon 14 Jul</h2>
+
+            <article class="timeline-item" data-kind="meal">
+              <div class="food-thumb bowl" aria-hidden="true">🥗</div>
+              <div class="timeline-copy">
+                <h3>Quinoa garden bowl</h3>
+                <p>13:08 · Lunch</p>
+                <div class="mini-badges protective"><span>Fermented</span></div>
+              </div>
+              <button class="row-menu" type="button" aria-label="Actions for Quinoa garden bowl" data-title="Quinoa garden bowl">⋯</button>
+            </article>
+          </section>
+        </div>
+
+        <div class="empty-state history-empty" id="historyEmpty" hidden>
+          <div class="empty-illustration" aria-hidden="true">🌱</div>
+          <h2>No entries yet</h2>
+          <p>Log your first meal to start spotting patterns.</p>
+          <button class="button button-primary" type="button" data-go-tab="log">Log your first meal</button>
+        </div>
+
+        <button class="text-button empty-toggle" id="emptyToggle" type="button">View empty state</button>
+      </section>
+
+      <section class="screen" id="screen-insights" data-screen="insights" role="tabpanel" aria-labelledby="tab-insights" hidden>
+        <div class="screen-intro">
+          <p class="eyebrow">Patterns, not guesses</p>
+          <h1>Your insights</h1>
+          <p>Connections become more useful as your daily log grows.</p>
+        </div>
+
+        <div class="demo-switch" id="insightSwitch" role="group" aria-label="Choose insight demo state">
+          <button type="button" data-insight-state="data" aria-pressed="true">With data</button>
+          <button type="button" data-insight-state="empty" aria-pressed="false">Not enough data yet</button>
+        </div>
+
+        <div id="insightsWithData">
+          <div class="section-heading">
+            <div>
+              <h2>Likely connections</h2>
+              <p>Ranked from your recent meals and gut logs.</p>
+            </div>
+          </div>
+
+          <article class="correlation-card">
+            <div class="correlation-top">
+              <div><span class="rank">1</span><h3>Gluten</h3></div>
+              <span class="severity high-trigger">High trigger</span>
+            </div>
+            <div class="delta-track" aria-label="Strong positive symptom change">
+              <span class="delta-fill coral" style="--delta:88%"></span>
+            </div>
+            <p><strong>+2.1 symptom points</strong> after exposure</p>
+            <small>Exposed 8 days vs clear 12 days</small>
+          </article>
+
+          <article class="correlation-card">
+            <div class="correlation-top">
+              <div><span class="rank">2</span><h3>Dairy</h3></div>
+              <span class="severity medium-trigger">Medium</span>
+            </div>
+            <div class="delta-track" aria-label="Medium positive symptom change">
+              <span class="delta-fill amber-fill" style="--delta:62%"></span>
+            </div>
+            <p><strong>+1.3 symptom points</strong> after exposure</p>
+            <small>Exposed 6 days vs clear 14 days</small>
+          </article>
+
+          <article class="correlation-card">
+            <div class="correlation-top">
+              <div><span class="rank">3</span><h3>Coffee</h3></div>
+              <span class="severity medium-trigger">Medium</span>
+            </div>
+            <div class="delta-track" aria-label="Medium positive symptom change">
+              <span class="delta-fill amber-fill" style="--delta:48%"></span>
+            </div>
+            <p><strong>+0.9 symptom points</strong> after exposure</p>
+            <small>Exposed 7 days vs clear 13 days</small>
+          </article>
+
+          <article class="correlation-card protective-card">
+            <div class="correlation-top">
+              <div><span class="rank">4</span><h3>Fermented foods</h3></div>
+              <span class="severity protective-trigger">Protective</span>
+            </div>
+            <div class="delta-track" aria-label="Protective symptom change">
+              <span class="delta-fill teal-fill" style="--delta:56%"></span>
+            </div>
+            <p><strong>−0.8 symptom points</strong> after exposure</p>
+            <small>Exposed 5 days vs clear 15 days</small>
+          </article>
+
+          <aside class="note-card">
+            <span aria-hidden="true">💡</span>
+            <p>Correlations need ≥4 gut-log days and ≥3 exposure days — keep logging.</p>
+          </aside>
+        </div>
+
+        <div class="empty-state insight-empty" id="insightsEmpty" hidden>
+          <div class="progress-ring" aria-label="2 of 4 gut-log days complete">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="ring-track" cx="60" cy="60" r="48"></circle>
+              <circle class="ring-progress" cx="60" cy="60" r="48"></circle>
+            </svg>
+            <span><strong>2 of 4</strong><small>gut-log days</small></span>
+          </div>
+          <h2>Your first pattern is taking shape</h2>
+          <p>Log two more gut check-ins and keep adding meals. We’ll only show a connection when there’s enough evidence to make it useful.</p>
+          <button class="button button-primary" type="button" data-go-tab="gut">Log today’s gut</button>
+        </div>
+
+        <article class="doctor-card">
+          <div class="doctor-icon" aria-hidden="true">🩺</div>
+          <div>
+            <p class="eyebrow">Bring the full picture</p>
+            <h2>Doctor report</h2>
+            <p>Turn your recent meals, symptoms and emerging patterns into a clear appointment summary.</p>
+          </div>
+          <button class="button button-primary button-block" id="generateReport" type="button">Generate report</button>
+        </article>
+      </section>
+
+      <section class="screen chat-screen" id="screen-chat" data-screen="chat" role="tabpanel" aria-labelledby="tab-chat" hidden>
+        <div class="screen-intro">
+          <p class="eyebrow">Your gut-health helper</p>
+          <h1>Ask UnGlutened</h1>
+          <p>Get a quick read on your own logged meals and symptoms.</p>
+        </div>
+
+        <div class="chat-thread" id="chatThread" aria-live="polite">
+          <article class="message assistant-message">
+            <div class="assistant-avatar" aria-hidden="true">U</div>
+            <div class="message-bubble">
+              <p><strong>Hi, Diogo.</strong> I can help you make sense of your meal and gut logs.</p>
+              <ul>
+                <li>Summarize a day or week</li>
+                <li>Find meals linked to symptoms</li>
+                <li>Add a simple meal entry</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="message user-message">
+            <div class="message-bubble">
+              <p>What did I eat yesterday?</p>
+            </div>
+          </article>
+
+          <article class="message assistant-message">
+            <div class="assistant-avatar" aria-hidden="true">U</div>
+            <div class="message-bubble">
+              <p><strong>Yesterday you logged two items:</strong></p>
+              <ul class="meal-summary-list">
+                <li><span>🍞</span><span><strong>Toast with butter</strong><small>08:16 · Gluten, dairy</small></span></li>
+                <li><span>☕</span><span><strong>Oat latte</strong><small>10:05 · Coffee</small></span></li>
+              </ul>
+              <p>Your evening gut check-in showed <strong>bloating 3</strong> and <strong>Bristol 6</strong>.</p>
+            </div>
+          </article>
+
+          <article class="message assistant-message typing-message" id="typingIndicator" hidden>
+            <div class="assistant-avatar" aria-hidden="true">U</div>
+            <div class="message-bubble typing-dots" aria-label="UnGlutened is typing">
+              <i></i><i></i><i></i>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="chat-dock" id="chatDock" hidden>
+      <div class="suggestion-scroller" aria-label="Suggested questions">
+        <button type="button" data-suggestion="What did I eat yesterday?">What did I eat yesterday?</button>
+        <button type="button" data-suggestion="Add: toast with butter">Add: toast with butter</button>
+        <button type="button" data-suggestion="How was my week?">How was my week?</button>
+      </div>
+      <form class="chat-form" id="chatForm">
+        <label class="sr-only" for="chatInput">Ask UnGlutened</label>
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Ask about your logs…">
+        <button type="submit" aria-label="Send message">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m3 3 18 9-18 9 3.6-9L3 3Z"></path>
+            <path d="M6.6 12H21"></path>
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <nav class="tab-bar" role="tablist" aria-label="Main navigation">
+      <button id="tab-log" type="button" role="tab" data-tab="log" aria-controls="screen-log" aria-selected="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        <span>Log</span>
+      </button>
+      <button id="tab-gut" type="button" role="tab" data-tab="gut" aria-controls="screen-gut" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4.5c-2.5 1.6-3.7 4-3.3 7 .5 3.7 3.2 6.8 6.8 8 3.6-1.2 6.3-4.3 6.8-8 .4-3-1-5.5-3.5-7-1.5-.9-2.5.3-3.3 1.5-.8-1.2-2-2.4-3.5-1.5Z"></path><path d="M9 10c1.8.8 4.2.8 6 0"></path></svg>
+        <span>Gut</span>
+      </button>
+      <button id="tab-history" type="button" role="tab" data-tab="history" aria-controls="screen-history" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+        <span>History</span>
+      </button>
+      <button id="tab-insights" type="button" role="tab" data-tab="insights" aria-controls="screen-insights" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7"></path></svg>
+        <span>Insights</span>
+      </button>
+      <button id="tab-chat" type="button" role="tab" data-tab="chat" aria-controls="screen-chat" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"></path></svg>
+        <span>Chat</span>
+      </button>
+    </nav>
+
+    <button class="preview-pill" id="previewPill" type="button" aria-label="Dismiss design preview message">
+      <span>Design preview · sample data</span><b aria-hidden="true">×</b>
+    </button>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </div>
+
+  <div class="sheet-scrim" id="sheetScrim" hidden></div>
+
+  <section class="bottom-sheet" id="bristolSheet" role="dialog" aria-modal="true" aria-labelledby="bristolSheetTitle" hidden>
+    <div class="drag-handle" aria-hidden="true"></div>
+    <div class="sheet-header">
+      <div>
+        <p class="eyebrow">Quick guide</p>
+        <h2 id="bristolSheetTitle">The Bristol stool scale</h2>
+      </div>
+      <button class="close-button" type="button" data-close-sheet aria-label="Close">×</button>
+    </div>
+    <p>It’s a simple clinical scale for describing stool consistency. Types 3 and 4 are generally considered the comfortable middle; one unusual day isn’t a diagnosis.</p>
+    <div class="bristol-key">
+      <span><b>1–2</b> Firmer</span>
+      <span class="ideal"><b>3–4</b> Comfortable</span>
+      <span><b>5–7</b> Looser</span>
+    </div>
+    <button class="button button-primary button-block" type="button" data-close-sheet>Got it</button>
+  </section>
+
+  <section class="bottom-sheet action-sheet" id="actionSheet" role="dialog" aria-modal="true" aria-labelledby="actionSheetTitle" hidden>
+    <div class="drag-handle" aria-hidden="true"></div>
+    <div class="sheet-header">
+      <div>
+        <p class="eyebrow">Entry actions</p>
+        <h2 id="actionSheetTitle">Edit entry</h2>
+      </div>
+      <button class="close-button" type="button" data-close-sheet aria-label="Close">×</button>
+    </div>
+    <button class="sheet-action" id="editEntry" type="button"><span>✎</span><span><strong>Edit</strong><small>Update details for this entry</small></span></button>
+    <button class="sheet-action danger-copy" id="requestDelete" type="button"><span>⌫</span><span><strong>Delete</strong><small>Remove this entry from your history</small></span></button>
+  </section>
+
+  <section class="bottom-sheet confirm-sheet" id="confirmSheet" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmDescription" hidden>
+    <div class="drag-handle" aria-hidden="true"></div>
+    <div class="confirm-icon" aria-hidden="true">⌫</div>
+    <h2 id="confirmTitle">Delete this entry?</h2>
+    <p id="confirmDescription">This removes it from your sample timeline. This action can’t be undone.</p>
+    <div class="button-stack">
+      <button class="button button-danger button-block" id="confirmDelete" type="button">Delete entry</button>
+      <button class="button button-ghost button-block" type="button" data-close-sheet>Keep it</button>
+    </div>
+  </section>
+
+  <section class="report-modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle" hidden>
+    <header class="report-toolbar">
+      <button class="close-button" id="closeReport" type="button" aria-label="Close report">×</button>
+      <div>
+        <p>Preview</p>
+        <strong>Doctor report</strong>
+      </div>
+      <span class="report-status">Sample</span>
+    </header>
+
+    <div class="report-scroll">
+      <article class="report-paper" id="reportPaper">
+        <header class="report-paper-header">
+          <div class="report-brand">
+            <img src="./logo.png" alt="" width="36" height="36">
+            <span>Un<strong>Glutened</strong></span>
+          </div>
+          <p>Gut health summary · 1–14 July 2026</p>
+        </header>
+
+        <section>
+          <p class="report-kicker">Patient summary</p>
+          <h1 id="reportTitle">Food &amp; symptom report</h1>
+          <dl class="patient-grid">
+            <div><dt>Patient</dt><dd>Diogo C.</dd></div>
+            <div><dt>Period</dt><dd>14 days</dd></div>
+            <div><dt>Meals logged</dt><dd>31</dd></div>
+            <div><dt>Gut logs</dt><dd>12</dd></div>
+          </dl>
+        </section>
+
+        <section>
+          <h2>Overview</h2>
+          <p>Symptoms were usually mild, with three moderate-bloating days. Higher symptom scores appeared more often after meals containing gluten and, less consistently, dairy. These are observational correlations, not diagnoses.</p>
+        </section>
+
+        <section>
+          <h2>Emerging correlations</h2>
+          <div class="report-table-wrap">
+            <table>
+              <thead>
+                <tr><th>Exposure</th><th>Direction</th><th>Evidence</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Gluten</td><td>Higher symptoms</td><td>8 exposed days</td></tr>
+                <tr><td>Dairy</td><td>Possibly higher</td><td>6 exposed days</td></tr>
+                <tr><td>Fermented foods</td><td>Possibly protective</td><td>5 exposed days</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h2>14-day log excerpt</h2>
+          <div class="report-log">
+            <div><time>14 Jul</time><p><strong>Quinoa garden bowl</strong><span>Bloating 1 · Bristol 4 · Mood good</span></p></div>
+            <div><time>13 Jul</time><p><strong>Toast, butter; oat latte</strong><span>Bloating 3 · Bristol 6 · Energy low</span></p></div>
+            <div><time>12 Jul</time><p><strong>Salmon, rice &amp; broccoli</strong><span>Bloating 1 · Bristol 4 · Mood good</span></p></div>
+            <div><time>11 Jul</time><p><strong>Chicken wrap; yoghurt</strong><span>Bloating 2 · Bristol 5 · Mood neutral</span></p></div>
+          </div>
+        </section>
+
+        <footer>
+          <p>Generated from patient-entered data. This report supports a clinical conversation and does not provide medical advice or a diagnosis.</p>
+        </footer>
+      </article>
+    </div>
+
+    <footer class="report-actions">
+      <button class="button button-ghost" type="button" data-report-action="Copy">Copy</button>
+      <button class="button button-ghost" type="button" data-report-action="Download">Download</button>
+      <button class="button button-primary" type="button" data-report-action="Print">Print</button>
+    </footer>
+  </section>
+
+  <script src="./face.js"></script>
+</body>
+</html>

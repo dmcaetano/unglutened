@@ -92,3 +92,8 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 - **2026-06-14** — **Versioning:** `version.json` starts at `1.0.1 "Iron Man"` (Marvel). Bump
   build +1 on every commit; new user-visible feature → minor +1, build=1, next hero rotating
   Marvel → DC → Dragon Ball → Naruto. Announce the version string on every push.
+
+## 2026-07-16 addendum — new UI face ready for wiring
+`app-face/` holds the approved warm/Airbnb-style design shell (v1.1.9) with QA screenshots in
+`app-face/qa-screens/`. Next: wire it into `public/` (replace current UI), keep all existing API calls.
+Preview locally: `.claude/launch.json` config `unglutened-face` (port 8378) in the 2026 Claude root.
