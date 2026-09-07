@@ -1,5 +1,7 @@
 # STATE — UnGlutened
 
+**SDLC class:** SOLO
+
 _Last updated: 2026-06-14_
 
 ## What this project is
@@ -97,3 +99,7 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 `app-face/` holds the approved warm/Airbnb-style design shell (v1.1.9) with QA screenshots in
 `app-face/qa-screens/`. Next: wire it into `public/` (replace current UI), keep all existing API calls.
 Preview locally: `.claude/launch.json` config `unglutened-face` (port 8378) in the 2026 Claude root.
+
+## Tooling notes
+
+- **2026-07-30:** Try the newly installed Claude Code plugins next session: `neon` (Neon Postgres MCP — uses @neondatabase/serverless), `context7` (live docs lookup), `security-guidance` (this is a chatbot handling user food/health data — flags unsafe input handling), `sentry` (error monitoring for the live Render deployment), `posthog` (usage analytics for the food/gut-health tracker).
