@@ -57,8 +57,11 @@ file, into `resources.yaml`, or into a commit.
 
 ## Non-negotiable
 
-- Paid LLM calls use `deepseek/deepseek-v4-flash`. **Anthropic models are forbidden** as the
-  paid model anywhere in what we build — not as a default, fallback or "auto" pick.
+- Anything that runs locally calls the model through the Claude Code CLI (`claude -p`) on
+  Diogo's **Anthropic subscription** — never an API key or metered provider, and no fallback to
+  one. Code hosted off his machines: ask Diogo before wiring any provider. How it is done: the
+  "LOCAL = ANTHROPIC SUBSCRIPTION" rule in `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`;
+  reference implementation `FRIDAY/app/llm.py`.
 - Done means deployed and verified by observed execution. A green build or an HTTP 200 is
   not proof.
 - Every commit bumps a version counter and is announced with the exact version string.
