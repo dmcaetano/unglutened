@@ -67,3 +67,7 @@ file, into `resources.yaml`, or into a commit.
 - Every commit bumps a version counter and is announced with the exact version string.
 
 <!-- END GENERATED: resources -->
+
+
+## Buddy family
+Read `~/.claude/skills/buddy-chat/references/family-ledger.md` and the "Family standard" in `what-is-a-buddy.md` before working here. Do this app's TODO rows; log any transversal improvement as a new ledger row.

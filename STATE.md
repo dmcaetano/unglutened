@@ -103,3 +103,9 @@ Preview locally: `.claude/launch.json` config `unglutened-face` (port 8378) in t
 ## Tooling notes
 
 - **2026-07-30:** Try the newly installed Claude Code plugins next session: `neon` (Neon Postgres MCP — uses @neondatabase/serverless), `context7` (live docs lookup), `security-guidance` (this is a chatbot handling user food/health data — flags unsafe input handling), `sentry` (error monitoring for the live Render deployment), `posthog` (usage analytics for the food/gut-health tracker).
+
+
+## To-do: Buddy family unification (Diogo, 2026-10-05)
+Source of truth: `~/.claude/skills/buddy-chat/references/family-ledger.md` (your column) + `what-is-a-buddy.md` "Family standard" + `Projects/2026 Claude/_meta/buddies/`. Do these when you next work here; flip the ledger cell when done.
+- Stack Cloudflare Pages Functions + React/Vite/TS (Render only if a free resource needs it); shared Supabase account + `buddy` memory schema; EN + PT-PT at onboarding.
+- TODO: **max 1 click** (photo -> meal logged in 1 tap, no form first); chat L2 -> markdown rendering + Undo on actions + rate limit; add profile + memory (provenance, quote-or-demote); delete account + password reset; EN + PT-PT; rotate the default SESSION_SECRET; bigint -> uuid user id mapping for the shared account.
