@@ -23,6 +23,8 @@ const T = {
   meals: `${SCHEMA}.meals`,
   symptoms: `${SCHEMA}.symptoms`,
   chat: `${SCHEMA}.chat_messages`,
+  omniLinks: `${SCHEMA}.omni_links`,
+  omniPushed: `${SCHEMA}.omni_pushed`,
 };
 
 /**
@@ -111,6 +113,28 @@ async function migrate() {
   await q(`CREATE INDEX IF NOT EXISTS meals_user_idx ON ${T.meals} (user_id)`);
   await q(`CREATE INDEX IF NOT EXISTS symptoms_user_idx ON ${T.symptoms} (user_id)`);
   await q(`CREATE INDEX IF NOT EXISTS chat_messages_user_idx ON ${T.chat} (user_id)`);
+
+  // OmniBuddy hub link (Buddy Contract v1): one active link per user; the token and per-link
+  // signing key are issued by the hub at link time. omni_pushed tracks which memory items were
+  // pushed so vanished ones can be tombstoned.
+  await q(`
+    CREATE TABLE IF NOT EXISTS ${T.omniLinks} (
+      link_id TEXT PRIMARY KEY,
+      user_id BIGINT NOT NULL,
+      token TEXT NOT NULL,
+      signing_key TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `);
+  await q(`CREATE INDEX IF NOT EXISTS omni_links_user_idx ON ${T.omniLinks} (user_id)`);
+  await q(`
+    CREATE TABLE IF NOT EXISTS ${T.omniPushed} (
+      user_id BIGINT NOT NULL,
+      origin_item_id TEXT NOT NULL,
+      PRIMARY KEY (user_id, origin_item_id)
+    )
+  `);
 }
 
 /**

@@ -100,6 +100,16 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
 `app-face/qa-screens/`. Next: wire it into `public/` (replace current UI), keep all existing API calls.
 Preview locally: `.claude/launch.json` config `unglutened-face` (port 8378) in the 2026 Claude root.
 
+## 2026-10-07 — OmniBuddy Buddy Contract v1 (v1.2.1 "Goku") — local commit only, NOT deployed
+- Endpoints: `GET /api/buddy/health`, `POST /api/buddy/link` (signed-in user pastes the hub code in Settings > OmniBuddy), `GET /api/buddy/card`, `POST /api/buddy/act` (primary|accept|undo), `POST /api/buddy/suggest` (always empty: no verified catalogue). All but health/link need the hub's HMAC signature (X-Omni-Timestamp/Link/Signature, 5 min skew).
+- Card = "Safe meal for now": the user's most recent logged meal with no flagged irritant and none of their top correlated suspects; one tap logs it again as eaten now (source `omnibuddy`), undo deletes exactly that row. `needs_data` names the missing input (log a first meal / log a meal without irritants).
+- Memory out: health hypotheses (`trigger:<item>`, sensitivity health, visibility app_only, never facts) pushed to hub `/api/ingest` (debounced after meal/symptom writes), vanished ones tombstoned. Chat in: `=== FROM YOUR OTHER BUDDIES (shared by you) ===` block appended after the system prompt, each line with its source Buddy; fails soft.
+- DB (additive, auto-migrated): `omni_links` (link id, token, signing key per user), `omni_pushed`.
+- **Secrets / env:** NO new secret to set. The per-link token + signing key are issued by the hub at link time and stored in `omni_links`. Optional env `OMNIBUDDY_URL` (default `https://omnibuddy-hub.pages.dev`; the hub URL is never taken from a request).
+- **Hub side still to do:** add `unglutened: https://unglutened.onrender.com` to `BUDDY_ORIGINS` + `CONTRACT_LIVE` in OmniBuddy `src/server/registry.ts`.
+- Not deployed/pushed: the app has open sign-up (possible users besides Diogo). Deploy needs Diogo's go. Version to look for after deploy: `/healthz` and `/api/buddy/health` show 1.2.1.
+- Tests: `npm test` (12 contract tests, no DB/hub). Conformance: `node test/buddy_fixture.js` then in OmniBuddy `npx vite-node scripts/contract-check.ts -- --url http://127.0.0.1:<port> --link-id test-link-1 --key <64 a's>` = 8/8 PASS.
+
 ## Tooling notes
 
 - **2026-07-30:** Try the newly installed Claude Code plugins next session: `neon` (Neon Postgres MCP — uses @neondatabase/serverless), `context7` (live docs lookup), `security-guidance` (this is a chatbot handling user food/health data — flags unsafe input handling), `sentry` (error monitoring for the live Render deployment), `posthog` (usage analytics for the food/gut-health tracker).

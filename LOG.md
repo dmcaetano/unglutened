@@ -5,6 +5,13 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-07 — Buddy Contract v1 for the OmniBuddy hub (v1.2.1 "Goku")
+
+Added the five contract endpoints, HMAC request verification, the safe-meal card + one-tap act + stateless undo token, memory push (health hypotheses, app_only) and the shared-context block in chat. See STATE.md for the details and the hub-side to-do. 12 new tests pass; the hub's contract-check is 8/8 green against a local instance. Committed locally, not pushed or deployed (open sign-up). SW cache bumped to v7 for the new Settings row.
+
+---
+
+
 ## 2026-06-14 — Text-logged meals get AI-inferred ingredients + allergens (v1.1.8 "Batman")
 
 **Why** (Diogo: "i logged sushi written and it did not suggest allergens — the LLM should guess allergens

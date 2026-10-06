@@ -1,7 +1,7 @@
 {
   "major": 1,
-  "minor": 1,
-  "build": 13,
-  "codename": "Batman",
-  "_note": "Bump build +1 every commit. New user-visible feature → minor+1, build=1, next hero rotating Marvel→DC→Dragon Ball→Naruto. Used codenames: Iron Man (Marvel), Batman (DC)."
+  "minor": 2,
+  "build": 1,
+  "codename": "Goku",
+  "_note": "Bump build +1 every commit. New user-visible feature → minor+1, build=1, next hero rotating Marvel→DC→Dragon Ball→Naruto. Used codenames: Iron Man (Marvel), Batman (DC), Goku (Dragon Ball)."
 }

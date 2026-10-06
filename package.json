@@ -6,7 +6,8 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/test_buddy_contract.js && node test/test_openrouter_key_resolver.js"
   },
   "engines": {
     "node": ">=20"

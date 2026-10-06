@@ -301,6 +301,18 @@
       btn.disabled = false;
     });
 
+    $('#omniLinkBtn').addEventListener('click', async () => {
+      const code = ($('#omniCode').value || '').trim();
+      if (!code) { toast('Paste the link code from OmniBuddy first', 'err'); return; }
+      try {
+        await api('/api/buddy/link', { method: 'POST', body: { code: code } });
+        $('#omniCode').value = '';
+        toast('Connected to OmniBuddy', 'ok');
+      } catch (err) {
+        toast(err && err.message ? err.message : 'Could not connect to OmniBuddy', 'err');
+      }
+    });
+
     $('#logoutBtn').addEventListener('click', async () => {
       try { await api('/api/auth/logout', { method: 'POST' }); } catch (e) {}
       state.user = null;

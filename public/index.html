@@ -242,6 +242,13 @@
     <div class="row"><span class="k">Database</span><span class="v" id="setDb">—</span></div>
     <div class="row"><span class="k">Meals logged</span><span class="v" id="setMeals">—</span></div>
     <div class="row"><span class="k">Gut check-ins</span><span class="v" id="setSymptoms">—</span></div>
+    <div class="row" style="flex-wrap:wrap;gap:6px">
+      <span class="k">OmniBuddy</span>
+      <span class="v" style="display:flex;gap:6px;flex:1;justify-content:flex-end">
+        <input id="omniCode" type="text" placeholder="OMNI-XXXXXXXXXX" autocomplete="off" autocapitalize="characters" style="width:150px;min-width:0" aria-label="OmniBuddy link code">
+        <button class="btn ghost" type="button" id="omniLinkBtn">Connect</button>
+      </span>
+    </div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn ghost" type="button" id="clearChatBtn">Clear chat history</button>
       <button class="btn ghost" type="button" id="logoutBtn">Log out</button>

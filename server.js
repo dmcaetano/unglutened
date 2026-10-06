@@ -18,7 +18,10 @@ const fs = require('fs');
 const express = require('express');
 
 const { migrate, health } = require('./db');
-const { requireAuth } = require('./lib/auth');
+const { requireAuth, verifyToken, COOKIE } = require('./lib/auth');
+const store = require('./lib/store');
+const buddyHub = require('./lib/buddyHub');
+const { createBuddyRouter } = require('./lib/buddyContract');
 
 const authRoutes = require('./routes/auth');
 const mealsRoutes = require('./routes/meals');
@@ -28,7 +31,8 @@ const chatRoutes = require('./routes/chat');
 
 const app = express();
 
-app.use(express.json({ limit: '20mb' }));
+// rawBody is kept for HMAC verification of OmniBuddy (Buddy Contract v1) signed requests.
+app.use(express.json({ limit: '20mb', verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); } }));
 
 // Read version.json once at boot for /healthz.
 function readVersion() {
@@ -62,11 +66,33 @@ app.get('/healthz', async (req, res) => {
 // Public auth routes (login/logout/status) — BEFORE the auth gate.
 app.use('/api/auth', authRoutes);
 
+// OmniBuddy hub: Buddy Contract v1. Signed-request-only (except /health); /link uses the user's session cookie.
+function sessionUserId(req) {
+  const m = /(?:^|;\s*)ug_session=([^;]+)/.exec((req.headers && req.headers.cookie) || '');
+  const parsed = m ? verifyToken(decodeURIComponent(m[1])) : null;
+  return parsed ? parsed.userId : null;
+}
+app.use('/api/buddy', createBuddyRouter({
+  version: VERSION.version,
+  publicUrl: process.env.PUBLIC_URL || 'https://unglutened.onrender.com',
+  links: buddyHub.dbLinks,
+  data: store,
+  sessionUserId,
+  completeLink: buddyHub.completeLink,
+  onLinked: (userId) => buddyHub.scheduleSync(userId, 1000),
+  onDataChanged: (userId) => buddyHub.scheduleSync(userId),
+}));
+
 // Everything under /api below this point requires a valid session (always on).
 // requireAuth verifies the ug_session cookie and sets req.userId.
 app.use('/api', requireAuth);
 
 // Protected API.
+// After any successful meal/symptom write, push the user's memory items to the OmniBuddy hub (debounced, best-effort).
+app.use(['/api/meals', '/api/symptoms'], (req, res, next) => {
+  if (req.method !== 'GET') res.on('finish', () => { if (res.statusCode < 300 && req.userId) buddyHub.scheduleSync(req.userId); });
+  next();
+});
 app.use('/api/meals', mealsRoutes);
 app.use('/api/symptoms', symptomsRoutes);
 app.use('/api', correlationsRoutes); // exposes /api/correlations and /api/report

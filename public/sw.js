@@ -9,7 +9,7 @@
      different session. So we never store or serve API responses from cache.
    skipWaiting + clients.claim make a new SW take over right away. */
 
-const CACHE_VERSION = 'unglutened-shell-v6';
+const CACHE_VERSION = 'unglutened-shell-v7';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
