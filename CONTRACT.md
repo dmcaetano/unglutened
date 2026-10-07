@@ -140,3 +140,6 @@ Calm, clinical health aesthetic: off-white background, one teal/green accent, sy
 - **.gitignore**: `node_modules`, `.env`, `*.log`, `.DS_Store`.
 - **.env.example**: every env var with placeholder values + comments.
 - **version.json**: `{"major":1,"minor":0,"build":1,"codename":"Iron Man","_note":"Bump build +1 every commit. New user-visible feature → minor+1, build=1, next hero rotating Marvel→DC→Dragon Ball→Naruto. Used codenames: Iron Man."}`.
+
+## Addendum: POST /api/buddy/connect (v1.3.1)
+Hub -> Buddy, HMAC-SHA256(OMNI_CONNECT_SECRET, ts + "." + rawBody), 5 min skew, replay refused, 10 bad signatures / 10 min / IP => 429. Missing secret => 503. Requires `email_verified === true` (else 409 not_verified), hub_url must equal the configured hub. Existing account is reused only if `users.email_verified` (set only by hub connect); otherwise 409 manual_required (takeover guard). New email => verified account with random unusable password. Then the normal `completeLink` redeems the code. Spec: OmniBuddy/sdlc/001-hub/CONNECT-SPEC.md.

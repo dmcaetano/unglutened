@@ -7,6 +7,7 @@ const { createBuddyRouter } = require('../lib/buddyContract');
 const LINK_ID = 'test-link-1';
 const KEY = 'a'.repeat(64);
 const USER = 7;
+const CONNECT_SECRET = 'dummy-connect-secret';
 
 function makeApp(opts = {}) {
   const now = opts.now || (() => new Date());
@@ -24,17 +25,25 @@ function makeApp(opts = {}) {
     async deleteMeal(u, id) { data.calls.del++; const i = meals.findIndex((m) => m.id === id && m.user_id === u); if (i >= 0) meals.splice(i, 1); return i >= 0; },
   };
   const links = { async get(id) { return id === LINK_ID ? { link_id: LINK_ID, user_id: USER, signing_key: KEY } : null; } };
+  const users = opts.users || [];
+  const connect = opts.connectSecret === null ? undefined : {
+    secret: () => opts.connectSecret || CONNECT_SECRET,
+    hubUrlAllowed: (u) => u === 'https://hub.test',
+    findUserByEmail: async (e) => users.find((u) => u.email === e) || null,
+    createVerifiedUser: async (e) => { const u = { id: 500 + users.length, email: e, email_verified: true }; users.push(u); return u; },
+  };
   const app = express();
   app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); } }));
   app.use('/api/buddy', createBuddyRouter({
     version: '9.9.9', publicUrl: 'https://example.test', now, links, data,
     sessionUserId: (req) => (req.headers['x-test-user'] ? Number(req.headers['x-test-user']) : null),
+    connect,
     completeLink: opts.completeLink || (async () => ({ ok: false, error: 'invalid code' })),
   }));
-  return { app, data, meals };
+  return { app, data, meals, users };
 }
 
-module.exports = { makeApp, LINK_ID, KEY, USER };
+module.exports = { makeApp, LINK_ID, KEY, USER, CONNECT_SECRET };
 
 if (require.main === module) {
   const { app } = makeApp();

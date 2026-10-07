@@ -271,3 +271,6 @@ signup → logout → login works, and `caches` holds **no `/api` entries** afte
   no console errors (one cosmetic favicon 404).
 - Polish backlog: add favicon link; demo login blocks on HTML5 required (add novalidate or prefill for mockup);
   import into Claude Design pending `/design consent`; then wire face into public/ as the real UI.
+
+## 2026-10-07 — v1.3.1 "Naruto": POST /api/buddy/connect
+Automatic link by OmniBuddy email (see CONTRACT.md addendum). New `users.email_verified` column. 8 new tests, signature check mutation-tested (2 tests kill it).

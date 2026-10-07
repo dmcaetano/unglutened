@@ -106,6 +106,7 @@ async function migrate() {
 
   // Multi-user: add a user_id scope column to each data table (the deployed
   // tables already exist without it) and index it for per-user lookups.
+  await q(`ALTER TABLE ${T.users} ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT false`);
   await q(`ALTER TABLE ${T.meals} ADD COLUMN IF NOT EXISTS user_id BIGINT`);
   await q(`ALTER TABLE ${T.symptoms} ADD COLUMN IF NOT EXISTS user_id BIGINT`);
   await q(`ALTER TABLE ${T.chat} ADD COLUMN IF NOT EXISTS user_id BIGINT`);

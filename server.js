@@ -32,6 +32,7 @@ const chatRoutes = require('./routes/chat');
 const app = express();
 
 // rawBody is kept for HMAC verification of OmniBuddy (Buddy Contract v1) signed requests.
+app.set('trust proxy', 1); // Render terminates TLS; req.ip must be the real client for the connect throttle
 app.use(express.json({ limit: '20mb', verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); } }));
 
 // Read version.json once at boot for /healthz.
@@ -79,6 +80,12 @@ app.use('/api/buddy', createBuddyRouter({
   data: store,
   sessionUserId,
   completeLink: buddyHub.completeLink,
+  connect: {
+    secret: () => process.env.OMNI_CONNECT_SECRET || '',
+    hubUrlAllowed: buddyHub.hubUrlAllowed,
+    findUserByEmail: (e) => store.getUserByEmail(e),
+    createVerifiedUser: (e) => store.createVerifiedUser(e),
+  },
   onLinked: (userId) => buddyHub.scheduleSync(userId, 1000),
   onDataChanged: (userId) => buddyHub.scheduleSync(userId),
 }));
