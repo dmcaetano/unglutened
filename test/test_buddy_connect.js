@@ -92,6 +92,46 @@ test('missing OMNI_CONNECT_SECRET => 503; hub_url off the allow-list => 400; hub
   assert.equal((await t.post(t.body({ hub_url: 'https://evil.test' }))).status, 400);
   assert.equal(t.users.length, 0);
   const r = await t.post(t.body({ code: 'nope' }));
-  assert.equal(r.status, 400); assert.equal(r.json.reason, 'hub_refused');
+  assert.equal(r.status, 400); assert.equal(r.json.reason, 'code_rejected');
+  t.close();
+});
+
+// ---- Connect-with-login (Buddy Contract v1.1) ----
+
+test('login: right email+password links THAT account, even when email differs; 200', async () => {
+  const t = await boot({ users: [{ id: 42, email: 'owner@example.com', email_verified: false, password_hash: 'pw:correct-horse' }] });
+  const r = await t.post(t.body({ login: { email: 'Owner@Example.com', password: 'correct-horse' } }));
+  assert.equal(r.status, 200); assert.deepEqual(r.json, { ok: true });
+  assert.equal(t.users.length, 1); // never creates an account on this path
+  assert.deepEqual(t.redeemed, [['good', 42]]);
+  t.close();
+});
+
+test('login: wrong password, unknown email, and no-password (OAuth-only) account all => 401 bad_login, nothing redeemed', async () => {
+  const t = await boot({ users: [
+    { id: 1, email: 'has-pw@example.com', email_verified: false, password_hash: 'pw:right' },
+    { id: 2, email: 'oauth-only@example.com', email_verified: true, password_hash: null },
+  ] });
+  assert.equal((await t.post(t.body({ login: { email: 'has-pw@example.com', password: 'wrong' } }))).json.reason, 'bad_login');
+  assert.equal((await t.post(t.body({ login: { email: 'nobody@example.com', password: 'whatever' } }), { ts: String(Date.now() + 1) })).json.reason, 'bad_login');
+  assert.equal((await t.post(t.body({ login: { email: 'oauth-only@example.com', password: '' } }), { ts: String(Date.now() + 2) })).status, 401);
+  assert.equal(t.redeemed.length, 0); assert.equal(t.users.length, 2);
+  t.close();
+});
+
+test('login: code refused by hub => 400 code_rejected (password was right)', async () => {
+  const t = await boot({ users: [{ id: 42, email: 'owner@example.com', email_verified: false, password_hash: 'pw:correct-horse' }] });
+  const r = await t.post(t.body({ code: 'nope', login: { email: 'owner@example.com', password: 'correct-horse' } }));
+  assert.equal(r.status, 400); assert.equal(r.json.reason, 'code_rejected');
+  t.close();
+});
+
+test('login: 5 failed attempts for an email within 15 min => 429 too_many_attempts', async () => {
+  const t = await boot({ users: [{ id: 42, email: 'owner@example.com', email_verified: false, password_hash: 'pw:correct-horse' }] });
+  for (let i = 0; i < 5; i++) {
+    await t.post(t.body({ login: { email: 'owner@example.com', password: 'wrong' } }), { ts: String(Date.now() + i) });
+  }
+  const r = await t.post(t.body({ login: { email: 'owner@example.com', password: 'correct-horse' } }), { ts: String(Date.now() + 10) });
+  assert.equal(r.status, 429); assert.equal(r.json.reason, 'too_many_attempts');
   t.close();
 });

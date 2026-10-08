@@ -31,6 +31,8 @@ function makeApp(opts = {}) {
     hubUrlAllowed: (u) => u === 'https://hub.test',
     findUserByEmail: async (e) => users.find((u) => u.email === e) || null,
     createVerifiedUser: async (e) => { const u = { id: 500 + users.length, email: e, email_verified: true }; users.push(u); return u; },
+    // Test-only stand-in for lib/auth's verifyPassword: a user's password_hash here is just 'pw:<password>'.
+    verifyPassword: (pw, stored) => typeof stored === 'string' && stored === 'pw:' + pw,
   };
   const app = express();
   app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf.toString('utf8'); } }));

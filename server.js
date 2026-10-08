@@ -18,7 +18,7 @@ const fs = require('fs');
 const express = require('express');
 
 const { migrate, health } = require('./db');
-const { requireAuth, verifyToken, COOKIE } = require('./lib/auth');
+const { requireAuth, verifyToken, COOKIE, verifyPassword } = require('./lib/auth');
 const store = require('./lib/store');
 const buddyHub = require('./lib/buddyHub');
 const { createBuddyRouter } = require('./lib/buddyContract');
@@ -85,6 +85,7 @@ app.use('/api/buddy', createBuddyRouter({
     hubUrlAllowed: buddyHub.hubUrlAllowed,
     findUserByEmail: (e) => store.getUserByEmail(e),
     createVerifiedUser: (e) => store.createVerifiedUser(e),
+    verifyPassword,
   },
   onLinked: (userId) => buddyHub.scheduleSync(userId, 1000),
   onDataChanged: (userId) => buddyHub.scheduleSync(userId),
