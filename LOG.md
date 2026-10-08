@@ -274,3 +274,15 @@ signup → logout → login works, and `caches` holds **no `/api` entries** afte
 
 ## 2026-10-07 — v1.3.1 "Naruto": POST /api/buddy/connect
 Automatic link by OmniBuddy email (see CONTRACT.md addendum). New `users.email_verified` column. 8 new tests, signature check mutation-tested (2 tests kill it).
+
+## 2026-10-08 — v1.4.3 "Thor": connect-with-login (Buddy Contract v1.1), and a live PK-collision bug found+fixed
+Implemented OmniBuddy/sdlc/connect-login-spec.md: POST /api/buddy/connect optional `login:{email,password}`
+reusing UnGlutened's own verifyPassword, rate-limited (5/15min per login.email -> 429 too_many_attempts),
+401 bad_login on any failure, never creates an account on this path. Renamed hub_refused -> code_rejected.
+4 new tests (16 total, green). Live verification surfaced a real pre-existing bug: omni_links.save() only
+cleared stale rows by user_id, but the hub reuses link_id on relink, so a relink after unlink collided on
+the link_id PK and 502'd with the real error silently swallowed. Fixed lib/buddyHub.js (delete by user_id
+OR link_id), added error logging to the connect route, added test/test_buddy_hub_links.js. v1.4.1 -> 1.4.2
+(logging) -> 1.4.3 (fix), all three deployed and confirmed live via /api/buddy/health. Full live verification
+(wrong/right login, hub "linked" status, brand-new-email auto-create, manual paste-code path, final unlink)
+passed against the real hub and a dedicated Supabase hub test account. Commits 4786846, 412170f, e81fab2.

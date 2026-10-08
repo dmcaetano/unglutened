@@ -115,6 +115,35 @@ Preview locally: `.claude/launch.json` config `unglutened-face` (port 8378) in t
 - **2026-07-30:** Try the newly installed Claude Code plugins next session: `neon` (Neon Postgres MCP — uses @neondatabase/serverless), `context7` (live docs lookup), `security-guidance` (this is a chatbot handling user food/health data — flags unsafe input handling), `sentry` (error monitoring for the live Render deployment), `posthog` (usage analytics for the food/gut-health tracker).
 
 
+## 2026-10-08 — v1.4.3 "Thor": connect-with-login (Buddy Contract v1.1) + a real production bug found and fixed
+- `POST /api/buddy/connect` now accepts optional `login:{email,password}`: when the hub-vouched email
+  already has a non-hub UnGlutened account (the old `manual_required` dead end), the hub forwards that
+  account's own email+password and this Buddy checks it with its own `verifyPassword` (never creates an
+  account on this path), then redeems the code for THAT account. 5 failed attempts/15min per
+  `login.email` -> 429 `too_many_attempts`; wrong/unknown/no-password account -> 401 `bad_login` (same
+  answer for all, no enumeration); password never logged/stored/echoed. Code-refused reason renamed
+  `hub_refused` -> `code_rejected` for both the login and legacy auto-create/link paths. 4 new tests
+  (16 buddy-contract tests total, all green).
+- **Live verify turned up a real bug, found and fixed in the same session** (not caused by this
+  feature): `omni_links.save()` only cleared stale rows by `user_id`, but the hub reuses the same
+  `link_id` for repeat links of the same hub account to an app (e.g. unlink then relink) — so a stale
+  row from a PREVIOUS local user collided on the `link_id` primary key and every relink 502'd
+  `hub_unreachable` with the real cause silently swallowed. Fixed in `lib/buddyHub.js` (delete by
+  `user_id` OR `link_id`); added `console.error` logging to the connect route's catch-all (previously
+  silent) and a new mocked-DB regression test `test/test_buddy_hub_links.js`. v1.4.1 (feature) ->
+  v1.4.2 (added logging) -> v1.4.3 (the actual fix), all deployed, all 3 versions confirmed live via
+  `/api/buddy/health`.
+- **Live verification, all via the real hub (omnibuddy-hub.pages.dev) and a real Supabase hub test
+  account** (diogomiguelcaetano+omnitest@gmail.com from OmniBuddy's `.scratch/testacct.txt`):
+  wrong password on an UnGlutened test account (`diogomiguelcaetano+ugtest@gmail.com`, created via
+  public signup) -> 401 `bad_login`; right password + fresh code -> 200 `ok:true`, hub `/api/buddies`
+  showed `unglutened` "linked"; a brand-new email never seen by UnGlutened, no `login` field -> 200
+  (auto-create + link, confirmed "linked", then unlinked); manual "paste an OMNI- code" path
+  (`POST /api/buddy/link`, cookie session) re-tested after the fix -> 200, confirmed "linked"; hub test
+  account unlinked at the end (`/api/buddies` back to "available"). No secrets printed; no email account
+  touched besides the `+ugtest`/`+ugauto` UnGlutened test aliases and the dedicated hub test account.
+- Commits: `4786846` (feature), `412170f` (diagnostic logging), `e81fab2` (the PK-collision fix).
+
 ## To-do: Buddy family unification (Diogo, 2026-10-05)
 Source of truth: `~/.claude/skills/buddy-chat/references/family-ledger.md` (your column) + `what-is-a-buddy.md` "Family standard" + `Projects/2026 Claude/_meta/buddies/`. Do these when you next work here; flip the ledger cell when done.
 - Stack Cloudflare Pages Functions + React/Vite/TS (Render only if a free resource needs it); shared Supabase account + `buddy` memory schema; EN + PT-PT at onboarding.
