@@ -7,7 +7,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test test/test_buddy_contract.js test/test_buddy_connect.js && node test/test_openrouter_key_resolver.js"
+    "test": "node --test test/test_buddy_contract.js test/test_buddy_connect.js && node test/test_buddy_hub_links.js && node test/test_openrouter_key_resolver.js"
   },
   "engines": {
     "node": ">=20"
