@@ -1,0 +1,17 @@
+name = "unglutened"
+pages_build_output_dir = "public"
+compatibility_date = "2026-09-01"
+# @neondatabase/serverless and node:crypto (scrypt password hashing, carried
+# over unchanged from the Render/Express app so existing user rows keep
+# verifying) need a few Node built-ins that only exist under nodejs_compat.
+compatibility_flags = ["nodejs_compat"]
+
+# Non-secret config only. Secrets (DATABASE_URL, OPENROUTER_API_KEY,
+# SESSION_SECRET, OMNI_CONNECT_SECRET, APP_PASSWORD) are Pages secrets:
+# `wrangler pages secret put <NAME> --project-name unglutened`.
+[vars]
+DB_SCHEMA = "unglutened"
+OPENROUTER_VISION_MODEL = "google/gemini-2.5-flash-lite"
+OPENROUTER_CHAT_MODEL = "deepseek/deepseek-v4-flash"
+OMNIBUDDY_URL = "https://omnibuddy-hub.pages.dev"
+PUBLIC_URL = "https://unglutened.pages.dev"

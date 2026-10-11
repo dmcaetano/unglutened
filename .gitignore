@@ -6,3 +6,8 @@ node_modules
 .playwright-mcp/
 qa-*.png
 *.tmp.*
+
+# coflow (concurrent-session coordination — never commit these)
+.coflow-sessions.json
+.coflow-sessions.json.tmp
+.coflow-commit.lock

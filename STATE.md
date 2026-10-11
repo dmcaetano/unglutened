@@ -20,9 +20,13 @@ DeepSeek V4 Flash chat). Node 24, CommonJS, no build step, three deps only.
   toggles, network-only `/api` SW.
 - **Install on phone:** open the live URL → iOS Safari: Share → "Add to Home Screen"; Android Chrome:
   ⋮ menu → "Add to Home screen" / "Install app". Runs full-screen, stays logged in 30 days.
-- **Live URL:** https://unglutened.onrender.com — **sign up with your own email + password**;
-  each account's meals/gut logs/chat are private to it. (The old shared `APP_PASSWORD` gate is gone.)
+- **Live URL (primary, since 2026-10-11):** https://unglutened.pages.dev — Cloudflare Pages +
+  Pages Functions, never sleeps. **Sign up with your own email + password**; each account's
+  meals/gut logs/chat are private to it. (The old shared `APP_PASSWORD` gate is gone.)
+- **Legacy URL:** https://unglutened.onrender.com — still running (API/webhook callers only);
+  browser navigation there now 302-redirects to the Cloudflare URL.
 - **GitHub:** https://github.com/dmcaetano/unglutened (public) · **Render:** srv-d8nckgpo3t8c73cm6j40
+  (kept alive, not shut down) · **Cloudflare Pages project:** `unglutened`
 - All contract files built (5 parallel agents), integration-verified, then QA'd end-to-end locally
   and on the live URL with Playwright + curl: photo→ingredients (Gemini), gut log, history CRUD
   (inline edit/delete), insights ready + empty states (no fabrication), doctor report
@@ -148,3 +152,57 @@ Preview locally: `.claude/launch.json` config `unglutened-face` (port 8378) in t
 Source of truth: `~/.claude/skills/buddy-chat/references/family-ledger.md` (your column) + `what-is-a-buddy.md` "Family standard" + `Projects/2026 Claude/_meta/buddies/`. Do these when you next work here; flip the ledger cell when done.
 - Stack Cloudflare Pages Functions + React/Vite/TS (Render only if a free resource needs it); shared Supabase account + `buddy` memory schema; EN + PT-PT at onboarding.
 - TODO: **max 1 click** (photo -> meal logged in 1 tap, no form first); chat L2 -> markdown rendering + Undo on actions + rate limit; add profile + memory (provenance, quote-or-demote); delete account + password reset; EN + PT-PT; rotate the default SESSION_SECRET; bigint -> uuid user id mapping for the shared account.
+
+## 2026-10-11 — Migrated to Cloudflare Pages + Pages Functions (v1.4.4 "Thor") — the Render→Cloudflare TODO above, done
+
+**Why:** Render free tier sleeps idle services (30-60s cold start) and the whole Render workspace
+shares 750 free hours/month; OmniBuddy (the hub) calls UnGlutened's Buddy Contract endpoints and
+was timing out when it slept. Cloudflare Workers/Pages never sleep.
+
+- **New live URL:** https://unglutened.pages.dev (Cloudflare Pages project `unglutened`). Followed
+  the StreamBuddy/SleepBuddy pattern exactly: `functions/api/[[path]].js` catch-all replicates
+  every Express route (auth, meals, symptoms, correlations, report, chat, the full Buddy Contract
+  v1/v1.1 surface) with identical paths/status codes/JSON shapes; `functions/healthz.js` separately
+  (Pages Functions only intercepts a path matching a file under `functions/`, so `/healthz` needed
+  its own file — a GET to it through the `/api` catch-all would otherwise fall through to the SPA's
+  `index.html`, a real bug caught during live verification, fixed before shipping).
+- Same Neon database, same `unglutened` schema, both deployments point at the SAME
+  `DATABASE_URL` — existing user rows/scrypt password hashes keep working unchanged (verified: a
+  real signup + login + scrypt round-trip against the real DB from the Cloudflare URL).
+- **Node→Workers adaptations:** `functions/_lib/db.js` adds three new tables
+  (`omni_connect_seen`/`omni_connect_fail`/`omni_login_fail`) to back the Buddy Contract's replay
+  protection and bad-signature/login throttles in Postgres — Workers isolates don't keep the
+  Express version's in-memory `Map`s alive between requests. `functions/_lib/buddyContract.js`
+  signs/verifies with Web Crypto `HMAC` instead of `node:crypto`'s `createHmac`; cross-checked byte
+  for byte against `node:crypto` in `test/test_functions_catchall.mjs` (same hex digest). Password
+  hashing (`scrypt`) and the session-cookie HMAC were left on `node:crypto` under the
+  `nodejs_compat` compatibility flag — confirmed working live (not just in theory) via a real
+  signup/login against the real Neon DB. `lib/openrouter.js`'s filesystem vault-key fallback
+  (reads a Dropbox file) has no Workers equivalent — `functions/_lib/openrouter.js` reads
+  `OPENROUTER_API_KEY` from env (a Pages secret) only; still the SAME OpenRouter/Gemini/DeepSeek
+  provider and models, no new LLM provider added.
+- **Secrets** (`DATABASE_URL`, `OPENROUTER_API_KEY`, `SESSION_SECRET`, `OMNI_CONNECT_SECRET`) were
+  read from the live Render service via the Render API and piped directly into
+  `wrangler pages secret put` — never written to disk or printed. `APP_PASSWORD` was not migrated
+  (STATE.md already notes the shared-password gate is gone and unused).
+- **Render is NOT shut down** — srv-d8nckgpo3t8c73cm6j40 keeps running so any caller still pointed
+  at it (the OmniBuddy hub, until its registration is updated) keeps working. `server.js` got one
+  small addition: a real-browser navigation GET (`Accept: text/html`, not `/api/*` or `/healthz`)
+  302-redirects to `https://unglutened.pages.dev`; `/api/*`, `/healthz`, and asset requests
+  (JS/CSS/icons) are untouched. Verified locally before pushing.
+- **Tests:** the existing Express-era suite (`test_buddy_contract.js`, `test_buddy_connect.js`,
+  `test_buddy_hub_links.js`, `test_openrouter_key_resolver.js`) stayed green unmodified (they test
+  `lib/*.js` directly, which didn't change). Added `test/test_functions_catchall.mjs` for the parts
+  that DID change for the Workers port: no-DB routes, the auth gate, and the Web-Crypto/node:crypto
+  HMAC parity above. `functions/package.json` (`{"type":"module"}`) scopes ESM to `functions/`
+  only, so the root app (`server.js`/`lib/`/`routes/`, still CommonJS) is untouched.
+- **Live-verified with curl against the real Neon DB** (not just a 200): `/healthz` → `db:"up"`;
+  `/api/buddy/health` → `contract:1`; unsigned `/api/buddy/card` → 401; `/` → real HTML (200); a
+  throwaway test account signed up, logged in, read `/api/meals` (`[]`, real DB round-trip), wrote
+  and deleted a `/api/symptoms` row, and ran a real `/api/chat` turn (DeepSeek tool-call
+  `get_today`, real OpenRouter call) — then the test symptom row was deleted to leave the shared DB
+  clean. Timing: Cloudflare ~0.28s vs Render (warm) ~0.32s for `/healthz`; Render's real advantage
+  disappears specifically on a COLD start (30-60s), which Cloudflare never has.
+- Not done: OmniBuddy hub's own registration of UnGlutened's base URL still needs a separate update
+  (in the OmniBuddy project) to call `unglutened.pages.dev` instead of the Render URL — flagged for
+  a follow-up session, out of scope for this migration.

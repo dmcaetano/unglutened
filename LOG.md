@@ -286,3 +286,34 @@ OR link_id), added error logging to the connect route, added test/test_buddy_hub
 (logging) -> 1.4.3 (fix), all three deployed and confirmed live via /api/buddy/health. Full live verification
 (wrong/right login, hub "linked" status, brand-new-email auto-create, manual paste-code path, final unlink)
 passed against the real hub and a dedicated Supabase hub test account. Commits 4786846, 412170f, e81fab2.
+
+## 2026-10-11 — v1.4.4 "Thor": migrated to Cloudflare Pages + Pages Functions
+Render's free tier sleeps idle services (30-60s cold start), timing out OmniBuddy's Buddy Contract
+calls. Ported the whole Express app onto Cloudflare Pages Functions, following the StreamBuddy/
+SleepBuddy pattern: `functions/api/[[path]].js` catch-all (every /api/* route, same paths/status
+codes/JSON shapes) + `functions/healthz.js` (needed its own file — a GET through the /api
+catch-all alone falls through to the SPA shell, caught live and fixed before shipping) +
+`functions/_lib/*.js` ESM ports of db.js/lib/*.js. Same Neon DB/schema as Render (both point at
+the same DATABASE_URL) — existing user rows/scrypt hashes keep working, verified live. Workers
+adaptations: the Express version's in-memory replay/throttle Maps (Buddy Contract connect
+signature replay + bad-signature/login-failure throttles) moved into three new Postgres tables
+(Workers isolates don't persist in-memory state across requests); HMAC signing for the Buddy
+Contract moved to Web Crypto (cross-checked byte-for-byte against node:crypto in the new test
+file); scrypt password hashing + the session-cookie HMAC stayed on node:crypto under
+`nodejs_compat` (confirmed working live, not just compiling); OpenRouter key resolution dropped
+the Express version's filesystem-vault fallback (no filesystem on Workers) — reads
+OPENROUTER_API_KEY from env (Pages secret) only, same provider/models (Gemini 2.5 Flash Lite,
+DeepSeek V4 Flash), no new LLM provider. Secrets copied from the live Render service via the
+Render API, piped straight into `wrangler pages secret put` (never written to disk or printed).
+Render (srv-d8nckgpo3t8c73cm6j40) is NOT shut down — still serves /api/* and /healthz for any
+caller still pointed at it; added a small server.js redirect so a real browser landing on Render
+(Accept: text/html, not /api/* or /healthz) 302s to the new Cloudflare URL; API/asset requests are
+untouched. Tests: the existing 16-test Express-era suite stayed green unmodified (it tests lib/*.js
+directly); added test/test_functions_catchall.mjs (10 new tests) for what changed — no-DB routes,
+the auth gate, Web-Crypto/node:crypto HMAC parity — via `functions/package.json` scoping ESM to
+functions/ only. Live-verified against the real Neon DB with curl: /healthz (db:"up"),
+/api/buddy/health (contract:1), unsigned /api/buddy/card (401), / (real HTML 200), a throwaway
+test account's full signup -> login -> /api/meals read -> /api/symptoms write+delete -> real
+/api/chat turn (DeepSeek tool-call, real OpenRouter call) — test data cleaned up after. New live
+URL: https://unglutened.pages.dev. Not done: OmniBuddy hub's own registration of UnGlutened's base
+URL (a separate project) still points at Render — flagged as a follow-up, out of scope here.

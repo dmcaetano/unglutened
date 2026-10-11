@@ -1,0 +1,5 @@
+{
+  "type": "module",
+  "private": true,
+  "description": "ESM scope for Cloudflare Pages Functions — does not affect the CommonJS root app (server.js/lib/routes) or override the root package.json's dependency list."
+}

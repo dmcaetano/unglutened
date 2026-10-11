@@ -106,6 +106,21 @@ app.use('/api/symptoms', symptomsRoutes);
 app.use('/api', correlationsRoutes); // exposes /api/correlations and /api/report
 app.use('/api/chat', chatRoutes);
 
+// 2026-10-11 Cloudflare migration: UnGlutened now lives at
+// https://unglutened.pages.dev (never sleeps; Render free tier cold-starts in
+// 30-60s and was timing out OmniBuddy's Buddy Contract calls). This Render
+// service stays up (API/webhook callers, e.g. the OmniBuddy hub, still reach
+// it) but a real browser landing here is bounced to the new URL. Scoped to
+// plain navigation GETs only — /api/* and /healthz are untouched above.
+const NEW_HOME = 'https://unglutened.pages.dev';
+app.get('*', (req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (req.path.startsWith('/api/') || req.path === '/healthz') return next();
+  const accept = req.headers.accept || '';
+  if (accept.indexOf('text/html') === -1) return next(); // asset requests (css/js/icons) still served locally
+  return res.redirect(302, NEW_HOME + req.path + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''));
+});
+
 // Static frontend (after API so /api/* is never shadowed by static files).
 app.use(express.static(path.join(__dirname, 'public')));
 
