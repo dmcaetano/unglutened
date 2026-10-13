@@ -206,3 +206,9 @@ was timing out when it slept. Cloudflare Workers/Pages never sleep.
 - Not done: OmniBuddy hub's own registration of UnGlutened's base URL still needs a separate update
   (in the OmniBuddy project) to call `unglutened.pages.dev` instead of the Render URL — flagged for
   a follow-up session, out of scope for this migration.
+
+<!-- playbook-retrofit:start -->
+## Playbook retrofit (2026-10-13)
+
+- [ ] **15 open rows (5 high)** for this project in the Playbook ledger: `Dropbox\Obsidian\Work\wiki\playbook\LEDGER.md` (filter by project name). Pages: auth-identity, chat-agent, data-layer, deploy-release, llm-hosted, project-hygiene, security-abuse, testing-qa, ui-ux-pwa. Do the high rows first when working here; mark each row `done vX.Y.Z (date)` in the ledger.
+<!-- playbook-retrofit:end -->
